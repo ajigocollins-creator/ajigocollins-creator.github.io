@@ -5,73 +5,316 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CEO Dashboard | Collins Clothing</title>
   <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    .admin-form {
+      display: grid;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .admin-form input,
+    .admin-form select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 11px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .admin-form button {
+      padding: 11px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .add-btn {
+      background: #111827;
+      color: white;
+    }
+
+    .password-btn {
+      background: #e11d48;
+      color: white;
+    }
+
+    .delete-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 7px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .image-preview {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      display: none;
+    }
+
+    .summary-box {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .summary-item {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .summary-item strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+
+    .small-note {
+      color: #777;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      .summary-box {
+        grid-template-columns: 1fr;
+      }
+
+      .product-table {
+        font-size: 13px;
+      }
+    }
+  </style>
 </head>
+
 <body class="dashboard-body">
-  <!-- Login -->
+
+  <!-- LOGIN -->
   <div id="login-section">
     <div class="login-box">
       <h2 style="margin-bottom:8px;">CEO Dashboard</h2>
-      <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Collins Clothing Admin</p>
-      <input type="password" id="password" placeholder="Enter password" onkeypress="if(event.key==='Enter')login()">
+
+      <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">
+        Collins Clothing Admin
+      </p>
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter password"
+        onkeypress="if(event.key==='Enter') login()"
+      >
+
       <button onclick="login()">Login</button>
-      <p style="margin-top:16px;font-size:0.8rem;color:#999;">Default password: collins2026</p>
-      <p style="margin-top:8px;"><a href="index.html" style="color:#e11d48;font-size:0.9rem;">← Back to Shop</a></p>
+
+      <p style="margin-top:16px;font-size:0.8rem;color:#999;">
+        Default password: collins2026
+      </p>
+
+      <p style="margin-top:8px;">
+        <a href="index.html" style="color:#e11d48;font-size:0.9rem;">
+          ← Back to Shop
+        </a>
+      </p>
     </div>
   </div>
 
-  <!-- Dashboard -->
+
+  <!-- DASHBOARD -->
   <div id="dash-section" style="display:none;">
+
+    <!-- HEADER -->
     <header class="dash-header">
       <div>
         <strong>Collins Clothing</strong> — CEO Panel
       </div>
+
       <div style="display:flex;gap:16px;align-items:center;">
-        <a href="index.html" style="color:#94a3b8;font-size:0.9rem;">View Shop</a>
-        <button onclick="logout()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;">Logout</button>
+        <a
+          href="index.html"
+          style="color:#94a3b8;font-size:0.9rem;"
+        >
+          View Shop
+        </a>
+
+        <button
+          onclick="logout()"
+          style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;"
+        >
+          Logout
+        </button>
       </div>
     </header>
 
+
     <div class="dash-container">
-      <!-- Stats -->
+
+      <!-- STATS -->
       <div class="stats-grid">
+
         <div class="stat-box">
           <div class="num" id="stat-total">0</div>
           <div class="label">Total Products</div>
         </div>
+
         <div class="stat-box">
           <div class="num" id="stat-available">0</div>
           <div class="label">Available</div>
         </div>
+
         <div class="stat-box">
           <div class="num" id="stat-sold">0</div>
           <div class="label">Sold Out</div>
         </div>
+
         <div class="stat-box">
           <div class="num" id="stat-orders">0</div>
           <div class="label">Orders</div>
         </div>
+
       </div>
 
-      <!-- Orders -->
+
+      <!-- SALES SUMMARY -->
       <div class="dash-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <h2>Customer Orders</h2>
-          <button onclick="clearOrders()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Clear All</button>
+
+        <h2>Sales Summary</h2>
+
+        <div class="summary-box">
+
+          <div class="summary-item">
+            <strong id="stat-revenue">₦0</strong>
+            <span>Total Revenue</span>
+          </div>
+
+          <div class="summary-item">
+            <strong id="stat-items-sold">0</strong>
+            <span>Items Ordered</span>
+          </div>
+
+          <div class="summary-item">
+            <strong id="stat-average">₦0</strong>
+            <span>Average Order</span>
+          </div>
+
         </div>
-        <div id="orders-list" class="orders-list"></div>
+
       </div>
 
-      <!-- Product Management -->
+
+      <!-- ADD PRODUCT -->
       <div class="dash-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <h2>Manage Products</h2>
-          <button onclick="resetToDefault()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Reset to Default</button>
-        </div>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">
-          Edit names & prices, then click <strong>Save</strong>. Toggle availability to mark items as Available or Sold Out. Changes appear instantly on the shop.
+
+        <h2>➕ Add New Product</h2>
+
+        <p class="small-note">
+          Add a new clothing item to your shop. The image will be resized
+          automatically before being saved.
         </p>
+
+        <div class="admin-form">
+
+          <input
+            type="text"
+            id="new-product-name"
+            placeholder="Product name"
+          >
+
+          <input
+            type="number"
+            id="new-product-price"
+            placeholder="Price in Naira"
+            min="0"
+          >
+
+          <select id="new-product-status">
+            <option value="true">Available</option>
+            <option value="false">Sold Out</option>
+          </select>
+
+          <input
+            type="file"
+            id="new-product-image"
+            accept="image/*"
+            onchange="previewNewImage(event)"
+          >
+
+          <img
+            id="new-image-preview"
+            class="image-preview"
+            alt="Image preview"
+          >
+
+          <button
+            class="add-btn"
+            onclick="addProduct()"
+          >
+            Add Product
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ORDERS -->
+      <div class="dash-card">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;">
+
+          <h2>Customer Orders</h2>
+
+          <button
+            onclick="clearOrders()"
+            style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;"
+          >
+            Clear All
+          </button>
+
+        </div>
+
+        <div
+          id="orders-list"
+          class="orders-list"
+        ></div>
+
+      </div>
+
+
+      <!-- PRODUCTS -->
+      <div class="dash-card">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;">
+
+          <h2>Manage Products</h2>
+
+          <button
+            onclick="resetToDefault()"
+            style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;"
+          >
+            Reset to Default
+          </button>
+
+        </div>
+
+        <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">
+          Edit names and prices, change availability, or delete products.
+        </p>
+
         <div style="overflow-x:auto;">
+
           <table class="product-table">
+
             <thead>
               <tr>
                 <th>Image</th>
@@ -81,36 +324,113 @@
                 <th>Action</th>
               </tr>
             </thead>
+
             <tbody id="product-table-body"></tbody>
+
           </table>
+
         </div>
+
       </div>
 
+
+      <!-- CHANGE PASSWORD -->
       <div class="dash-card">
+
+        <h2>🔐 Change Dashboard Password</h2>
+
+        <p class="small-note">
+          This changes the password saved in this browser.
+        </p>
+
+        <div class="admin-form">
+
+          <input
+            type="password"
+            id="current-password"
+            placeholder="Current password"
+          >
+
+          <input
+            type="password"
+            id="new-password"
+            placeholder="New password"
+          >
+
+          <input
+            type="password"
+            id="confirm-password"
+            placeholder="Confirm new password"
+          >
+
+          <button
+            class="password-btn"
+            onclick="changePassword()"
+          >
+            Change Password
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- STORE INFO -->
+      <div class="dash-card">
+
         <h2>Store Info</h2>
+
         <p style="line-height:1.8;color:#444;">
           <strong>Address:</strong> Lagos Island, Ikate, Lekki, Lagos<br>
           <strong>Phone / WhatsApp:</strong> 0904 710 1249<br>
           <strong>Email:</strong> ajigocollins@gmail.com<br>
-          <strong>Bank:</strong> PiggyVest — Ajigo Collins Ojenya — 9043728140
+          <strong>Bank:</strong> PiggyVest — Ajigo Collins Ojenya
         </p>
+
       </div>
 
+
+      <!-- SUPABASE -->
       <div class="dash-card">
-        <h2>How to connect Supabase (cross-device)</h2>
+
+        <h2>How to connect Supabase</h2>
+
         <ol style="padding-left:20px;color:#555;line-height:1.9;">
-          <li>Go to <a href="https://supabase.com" target="_blank" style="color:#e11d48;">supabase.com</a> and create a free account</li>
-          <li>Create a new project</li>
-          <li>In SQL Editor, run the SQL from the README to create tables</li>
-          <li>Copy your Project URL and anon key</li>
-          <li>Paste them into <code>js/supabase-config.js</code></li>
-          <li>The site will then sync products & orders across all devices</li>
+
+          <li>
+            Create a Supabase project.
+          </li>
+
+          <li>
+            Run the SQL from your README.
+          </li>
+
+          <li>
+            Copy your Project URL and anon key.
+          </li>
+
+          <li>
+            Put them inside
+            <code>js/supabase-config.js</code>.
+          </li>
+
         </ol>
+
+        <p class="small-note">
+          Supabase is what you will need if you want your CEO dashboard
+          and shop to share products and orders across different phones
+          and computers.
+        </p>
+
       </div>
+
     </div>
   </div>
 
+
+  <!-- JAVASCRIPT -->
   <script src="js/products.js"></script>
   <script src="js/dashboard.js"></script>
+
 </body>
-</html>
+                           </html>
