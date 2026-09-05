@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CEO Dashboard | Collins Clothing</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-body">
+  <!-- Login -->
+  <div id="login-section">
+    <div class="login-box">
+      <h2 style="margin-bottom:8px;">CEO Dashboard</h2>
+      <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Collins Clothing Admin</p>
+      <input type="password" id="password" placeholder="Enter password" onkeypress="if(event.key==='Enter')login()">
+      <button onclick="login()">Login</button>
+      <p style="margin-top:16px;font-size:0.8rem;color:#999;">Default password: collins2026</p>
+      <p style="margin-top:8px;"><a href="index.html" style="color:#e11d48;font-size:0.9rem;">← Back to Shop</a></p>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dash-section" style="display:none;">
+    <header class="dash-header">
+      <div>
+        <strong>Collins Clothing</strong> — CEO Panel
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;">
+        <a href="index.html" style="color:#94a3b8;font-size:0.9rem;">View Shop</a>
+        <button onclick="logout()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;">Logout</button>
+      </div>
+    </header>
+
+    <div class="dash-container">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="num" id="stat-total">0</div>
+          <div class="label">Total Products</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="stat-available">0</div>
+          <div class="label">Available</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="stat-sold">0</div>
+          <div class="label">Sold Out</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="stat-orders">0</div>
+          <div class="label">Orders</div>
+        </div>
+      </div>
+
+      <!-- Orders -->
+      <div class="dash-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2>Customer Orders</h2>
+          <button onclick="clearOrders()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Clear All</button>
+        </div>
+        <div id="orders-list" class="orders-list"></div>
+      </div>
+
+      <!-- Product Management -->
+      <div class="dash-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2>Manage Products</h2>
+          <button onclick="resetToDefault()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Reset to Default</button>
+        </div>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">
+          Edit names & prices, then click <strong>Save</strong>. Toggle availability to mark items as Available or Sold Out. Changes appear instantly on the shop.
+        </p>
+        <div style="overflow-x:auto;">
+          <table class="product-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Price (₦)</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="product-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h2>Store Info</h2>
+        <p style="line-height:1.8;color:#444;">
+          <strong>Address:</strong> Lagos Island, Ikate, Lekki, Lagos<br>
+          <strong>Phone / WhatsApp:</strong> 0904 710 1249<br>
+          <strong>Email:</strong> ajigocollins@gmail.com<br>
+          <strong>Bank:</strong> PiggyVest — Ajigo Collins Ojenya — 9043728140
+        </p>
+      </div>
+
+      <div class="dash-card">
+        <h2>How to connect Supabase (cross-device)</h2>
+        <ol style="padding-left:20px;color:#555;line-height:1.9;">
+          <li>Go to <a href="https://supabase.com" target="_blank" style="color:#e11d48;">supabase.com</a> and create a free account</li>
+          <li>Create a new project</li>
+          <li>In SQL Editor, run the SQL from the README to create tables</li>
+          <li>Copy your Project URL and anon key</li>
+          <li>Paste them into <code>js/supabase-config.js</code></li>
+          <li>The site will then sync products & orders across all devices</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/products.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
