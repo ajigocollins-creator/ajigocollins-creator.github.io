@@ -14,23 +14,23 @@ const STORE = {
 };
 
 const DEFAULT_PRODUCTS = [
-  { id: 1, name: "Slide Skate Blue Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/slide-skate-blue.jpg", available: true },
-  { id: 2, name: "Bear Outline Maroon Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/bear-outline-maroon.jpg", available: true },
-  { id: 3, name: "Smile Born To Skate Orange Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/smile-skate-orange.jpg", available: true },
-  { id: 4, name: "Dab Guy Black Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/dab-guy-black.jpg", available: true },
-  { id: 5, name: "Comic Boom White Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/comic-boom-white.jpg", available: true },
-  { id: 6, name: "Skull Hand White Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/skull-hand-white.jpg", available: true },
-  { id: 7, name: "Donald Duck White Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/donald-duck-white.jpg", available: true },
-  { id: 8, name: "Steady Grinding Black Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/steady-grinder-black.png", available: true },
-  { id: 9, name: "Champ Brown Patch Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/champ-brown.jpg", available: true },
-  { id: 10, name: "Red Jersey 98 Baseball Shirt", brand: "COLLINS CLOTHING", price: 15000, image: "images/red-jersey-98.jpg", available: true },
-  { id: 11, name: "Risk Takers Yellow Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/risk-takers-yellow.jpg", available: true },
-  { id: 12, name: "Basketball 23 Beige Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/basketball-23-beige.jpg", available: true },
-  { id: 13, name: "Steady Grinding Jeep White Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/steady-jeep-white.png", available: true },
-  { id: 14, name: "Enjoy The Play Black Tee", brand: "COLLINS CLOTHING", price: 15000, image: "images/enjoy-play-black.jpg", available: true }
+  { id: 1, name: "Slide Skate Blue Tee", brand: "COLLINS CLOTHING", price: 15000, image: "slide-skate-blue.jpg", available: true },
+  { id: 2, name: "Bear Outline Maroon Tee", brand: "COLLINS CLOTHING", price: 15000, image: "bear-outline-maroon.jpg", available: true },
+  { id: 3, name: "Smile Born To Skate Orange Tee", brand: "COLLINS CLOTHING", price: 15000, image: "smile-skate-orange.jpg", available: true },
+  { id: 4, name: "Dab Guy Black Tee", brand: "COLLINS CLOTHING", price: 15000, image: "dab-guy-black.jpg", available: true },
+  { id: 5, name: "Comic Boom White Tee", brand: "COLLINS CLOTHING", price: 15000, image: "comic-boom-white.jpg", available: true },
+  { id: 6, name: "Skull Hand White Tee", brand: "COLLINS CLOTHING", price: 15000, image: "skull-hand-white.jpg", available: true },
+  { id: 7, name: "Donald Duck White Tee", brand: "COLLINS CLOTHING", price: 15000, image: "donald-duck-white.jpg", available: true },
+  { id: 8, name: "Steady Grinding Black Tee", brand: "COLLINS CLOTHING", price: 15000, image: "steady-grinder-black.png", available: true },
+  { id: 9, name: "Champ Brown Patch Tee", brand: "COLLINS CLOTHING", price: 15000, image: "champ-brown.jpg", available: true },
+  { id: 10, name: "Red Jersey 98 Baseball Shirt", brand: "COLLINS CLOTHING", price: 15000, image: "red-jersey-98.jpg", available: true },
+  { id: 11, name: "Risk Takers Yellow Tee", brand: "COLLINS CLOTHING", price: 15000, image: "risk-takers-yellow.jpg", available: true },
+  { id: 12, name: "Basketball 23 Beige Tee", brand: "COLLINS CLOTHING", price: 15000, image: "basketball-23-beige.jpg", available: true },
+  { id: 13, name: "Steady Grinding Jeep White Tee", brand: "COLLINS CLOTHING", price: 15000, image: "steady-jeep-white.png", available: true },
+  { id: 14, name: "Enjoy The Play Black Tee", brand: "COLLINS CLOTHING", price: 15000, image: "enjoy-play-black.jpg", available: true }
 ];
 
-// ========== DATA LAYER (localStorage + ready for Supabase) ==========
+// ========== DATA LAYER ==========
 function getProducts() {
   const stored = localStorage.getItem('collins_products');
   if (stored) {
@@ -158,7 +158,7 @@ function renderProducts(filter = 'all') {
   grid.innerHTML = products.map(p => `
     <div class="product-card ${p.available ? '' : 'sold-out'}">
       <div class="product-image-wrap">
-        <img src="${p.image}" alt="${p.name}" loading="lazy">
+        <img src="\( {p.image}" alt=" \){p.name}" loading="lazy">
         <button class="wishlist-btn" onclick="toggleWishlist(this)" title="Wishlist">♡</button>
         ${!p.available ? '<span class="sold-badge">SOLD OUT</span>' : ''}
       </div>
@@ -205,7 +205,7 @@ function renderCart() {
 
   container.innerHTML = cart.map(item => `
     <div class="cart-item">
-      <img src="${item.image}" alt="${item.name}">
+      <img src="\( {item.image}" alt=" \){item.name}">
       <div class="cart-item-info">
         <div class="cart-item-title">${item.name}</div>
         <div class="cart-item-price">${formatPrice(item.price)}</div>
@@ -247,7 +247,6 @@ function updateCheckoutTotal() {
   if (delEl) delEl.textContent = deliveryType === 'delivery' ? formatPrice(DELIVERY_FEE) : 'Free';
   if (totEl) totEl.textContent = formatPrice(total);
 
-  // Make address required only for delivery
   const addressGroup = document.getElementById('address-group');
   const addressInput = document.getElementById('cust-address');
   if (deliveryType === 'pickup') {
@@ -312,13 +311,11 @@ function placeOrder(e) {
   renderCart();
   closeCheckout();
   document.getElementById('checkout-form').reset();
-  // reset delivery to pickup
   const pickupRadio = document.querySelector('input[name="delivery"][value="pickup"]');
   if (pickupRadio) pickupRadio.checked = true;
 
   showToast('Order placed! Opening WhatsApp...');
 
-  // Build WhatsApp message
   const itemsText = cart.map(i => `• ${i.qty}x ${i.name} - ${formatPrice(i.price * i.qty)}`).join('%0A');
   const deliveryText = deliveryType === 'delivery' 
     ? `Delivery (+${formatPrice(DELIVERY_FEE)})%0AAddress: ${address}` 
@@ -339,7 +336,6 @@ function placeOrder(e) {
     `Account: 9043728140%0A%0A` +
     `Please confirm my order. Thank you!`;
 
-  // Open WhatsApp automatically
   setTimeout(() => {
     window.open(`https://wa.me/2349047101249?text=${msg}`, '_blank');
   }, 600);
