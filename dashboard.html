@@ -34,6 +34,7 @@
       border-radius: 6px;
       margin-bottom: 8px;
       font-size: 0.9rem;
+      box-sizing: border-box;
     }
     .product-manage-actions {
       display: flex;
@@ -50,9 +51,9 @@
     <div class="login-box">
       <h2 style="margin-bottom:8px;">CEO Dashboard</h2>
       <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Collins Clothing Admin</p>
-      <input type="password" id="password" placeholder="Enter password" onkeypress="if(event.key==='Enter') doLogin()">
-      <button onclick="doLogin()">Login</button>
-      <p style="margin-top:16px;font-size:0.8rem;color:#999;">Contact admin if you forgot the password</p>
+      <input type="password" id="password" placeholder="Enter password">
+      <button onclick="doLogin()" style="margin-top:12px;">Login</button>
+      <p style="margin-top:16px;font-size:0.8rem;color:#999;">Default password: collins2026</p>
       <p style="margin-top:8px;"><a href="index.html" style="color:#e11d48;font-size:0.9rem;">← Back to Shop</a></p>
     </div>
   </div>
@@ -63,14 +64,12 @@
       <div><strong>Collins Clothing</strong> — CEO Panel</div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
         <a href="index.html" style="color:#94a3b8;font-size:0.9rem;">View Shop</a>
-        <button onclick="showChangePassword()" style="background:#334155;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Change Password</button>
         <button onclick="doLogout()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;">Logout</button>
       </div>
     </header>
 
     <div class="dash-container">
 
-      <!-- STATS -->
       <div class="stats-grid">
         <div class="stat-box"><div class="num" id="stat-total">0</div><div class="label">Total Products</div></div>
         <div class="stat-box"><div class="num" id="stat-available">0</div><div class="label">Available</div></div>
@@ -81,39 +80,37 @@
       <!-- ADD NEW PRODUCT -->
       <div class="dash-card">
         <h2>Add New Product</h2>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Choose a photo from your gallery</p>
-        <div style="margin-bottom:12px;">
-          <input type="file" id="new-image" accept="image/*" onchange="previewNewImage(event)">
-          <img id="new-preview" style="display:none;width:100px;height:100px;object-fit:cover;border-radius:8px;margin-top:10px;">
-        </div>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:12px;">Choose photo from your gallery</p>
+        <input type="file" id="new-image" accept="image/*" onchange="previewNewImage(event)">
+        <img id="new-preview" style="display:none;width:100px;height:100px;object-fit:cover;border-radius:8px;margin:10px 0;">
         <div class="form-group">
           <label>Product Name</label>
-          <input type="text" id="new-name" placeholder="e.g. Steady Grinding Black Tee">
+          <input type="text" id="new-name" placeholder="Product name">
         </div>
         <div class="form-group">
           <label>Price (₦)</label>
           <input type="number" id="new-price" value="15000">
         </div>
-        <button onclick="addNewProduct()" class="save-btn" style="padding:12px 20px;width:100%;">Add Product</button>
+        <button onclick="addNewProduct()" class="save-btn" style="width:100%;padding:12px;">Add Product</button>
       </div>
 
       <!-- ORDERS -->
       <div class="dash-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <h2>Customer Orders</h2>
-          <button onclick="clearOrders()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Clear All</button>
+          <button onclick="clearOrders()" style="padding:8px 12px;border:1px solid #ddd;background:white;border-radius:6px;font-size:0.85rem;">Clear All</button>
         </div>
-        <div id="orders-list" class="orders-list"></div>
+        <div id="orders-list"></div>
       </div>
 
-      <!-- MANAGE PRODUCTS (Card layout - works better on phone) -->
+      <!-- MANAGE PRODUCTS -->
       <div class="dash-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <h2>Manage Products</h2>
-          <button onclick="resetToDefault()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Reset to Default</button>
+          <button onclick="resetToDefault()" style="padding:8px 12px;border:1px solid #ddd;background:white;border-radius:6px;font-size:0.85rem;">Reset to Default</button>
         </div>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">
-          Edit name or price → tap <strong>Save</strong>. Tap status to switch Available / Sold Out.
+        <p style="color:#666;font-size:0.9rem;margin-bottom:14px;">
+          Edit name/price → Save. Tap status to change Available / Sold Out.
         </p>
         <div id="product-list"></div>
       </div>
@@ -121,34 +118,20 @@
     </div>
   </div>
 
-  <!-- CHANGE PASSWORD MODAL -->
-  <div id="password-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;">
-    <div style="background:white;padding:24px;border-radius:12px;width:90%;max-width:360px;">
-      <h3 style="margin-bottom:16px;">Change Password</h3>
-      <input type="password" id="new-pass" placeholder="New password" style="width:100%;padding:12px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;">
-      <input type="password" id="confirm-pass" placeholder="Confirm new password" style="width:100%;padding:12px;margin-bottom:16px;border:1px solid #ddd;border-radius:8px;">
-      <div style="display:flex;gap:10px;">
-        <button onclick="document.getElementById('password-modal').style.display='none'" style="flex:1;padding:12px;border:1px solid #ddd;background:white;border-radius:8px;">Cancel</button>
-        <button onclick="changePassword()" style="flex:1;padding:12px;background:#e11d48;color:white;border:none;border-radius:8px;font-weight:600;">Save</button>
-      </div>
-    </div>
-  </div>
-
   <script src="products.js"></script>
   <script>
-    function getPassword() {
-      return localStorage.getItem('collins_dash_pass') || 'collins2026';
-    }
-
+    // Simple Login
     function doLogin() {
-      const pass = document.getElementById('password').value;
-      if (pass === getPassword()) {
+      var pass = document.getElementById('password').value;
+      var saved = localStorage.getItem('collins_dash_pass') || 'collins2026';
+
+      if (pass === saved) {
         sessionStorage.setItem('collins_ceo', 'true');
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('dash-section').style.display = 'block';
         loadDashboard();
       } else {
-        alert('Wrong password');
+        alert('Wrong password. Try: collins2026');
       }
     }
 
@@ -157,136 +140,119 @@
       location.reload();
     }
 
-    function showChangePassword() {
-      document.getElementById('password-modal').style.display = 'flex';
-    }
-
-    function changePassword() {
-      const newPass = document.getElementById('new-pass').value;
-      const confirm = document.getElementById('confirm-pass').value;
-      if (!newPass || newPass.length < 4) {
-        alert('Password must be at least 4 characters');
-        return;
-      }
-      if (newPass !== confirm) {
-        alert('Passwords do not match');
-        return;
-      }
-      localStorage.setItem('collins_dash_pass', newPass);
-      document.getElementById('password-modal').style.display = 'none';
-      alert('Password changed successfully!');
-    }
-
     function loadDashboard() {
-      const products = getProducts();
-      const available = products.filter(p => p.available).length;
-      const sold = products.filter(p => !p.available).length;
-      const orders = getOrders();
+      try {
+        var products = getProducts();
+        var available = products.filter(function(p){ return p.available; }).length;
+        var sold = products.filter(function(p){ return !p.available; }).length;
+        var orders = getOrders();
 
-      document.getElementById('stat-total').textContent = products.length;
-      document.getElementById('stat-available').textContent = available;
-      document.getElementById('stat-sold').textContent = sold;
-      document.getElementById('stat-orders').textContent = orders.length;
+        document.getElementById('stat-total').textContent = products.length;
+        document.getElementById('stat-available').textContent = available;
+        document.getElementById('stat-sold').textContent = sold;
+        document.getElementById('stat-orders').textContent = orders.length;
 
-      // Render products as cards (better for mobile)
-      const list = document.getElementById('product-list');
-      list.innerHTML = products.map(p => `
-        <div class="product-manage-card" data-id="${p.id}">
-          <img src="\( {p.image}" alt=" \){p.name}">
-          <div class="product-manage-info">
-            <input type="text" class="edit-name" value="${p.name}" placeholder="Product name">
-            <input type="number" class="edit-price" value="${p.price}" placeholder="Price">
-            <div class="product-manage-actions">
-              <button class="status-toggle \( {p.available ? 'available' : 'sold'}" onclick="toggleStatus( \){p.id})">
-                ${p.available ? 'Available' : 'Sold Out'}
-              </button>
-              <button class="save-btn" onclick="saveProduct(${p.id})">Save</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
+        // Products list
+        var list = document.getElementById('product-list');
+        var html = '';
+        for (var i = 0; i < products.length; i++) {
+          var p = products[i];
+          html += '<div class="product-manage-card" data-id="' + p.id + '">' +
+            '<img src="' + p.image + '" alt="">' +
+            '<div class="product-manage-info">' +
+              '<input type="text" class="edit-name" value="' + p.name + '">' +
+              '<input type="number" class="edit-price" value="' + p.price + '">' +
+              '<div class="product-manage-actions">' +
+                '<button class="status-toggle ' + (p.available ? 'available' : 'sold') + '" onclick="toggleStatus(' + p.id + ')">' +
+                  (p.available ? 'Available' : 'Sold Out') +
+                '</button>' +
+                '<button class="save-btn" onclick="saveProduct(' + p.id + ')">Save</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }
+        list.innerHTML = html;
 
-      // Orders
-      const container = document.getElementById('orders-list');
-      if (orders.length === 0) {
-        container.innerHTML = '<p style="color:#666;padding:10px 0;">No orders yet.</p>';
-      } else {
-        container.innerHTML = orders.map(o => `
-          <div class="order-card">
-            <div class="order-header">
-              <span>#${o.id} • ${o.date}</span>
-              <span style="color:#e11d48;">${formatPrice(o.total)}</span>
-            </div>
-            <div><strong>${o.customer.name}</strong> • ${o.customer.phone}</div>
-            <div style="font-size:0.9rem;color:#555;">
-              ${o.delivery === 'delivery' ? '🚚 Delivery' : '🏪 Pickup'}
-              ${o.customer.address && o.customer.address !== 'Pickup' ? ' • ' + o.customer.address : ''}
-            </div>
-            ${o.customer.note ? `<div style="font-size:0.85rem;color:#888;margin-top:4px;">Note: ${o.customer.note}</div>` : ''}
-            <div class="order-items">\( {o.items.map(i => ` \){i.qty}× ${i.name}`).join(' • ')}</div>
-          </div>
-        `).join('');
+        // Orders
+        var container = document.getElementById('orders-list');
+        if (orders.length === 0) {
+          container.innerHTML = '<p style="color:#666;">No orders yet.</p>';
+        } else {
+          var ohtml = '';
+          for (var j = 0; j < orders.length; j++) {
+            var o = orders[j];
+            ohtml += '<div class="order-card">' +
+              '<div class="order-header"><span>#' + o.id + ' • ' + o.date + '</span><span style="color:#e11d48;">' + formatPrice(o.total) + '</span></div>' +
+              '<div><strong>' + o.customer.name + '</strong> • ' + o.customer.phone + '</div>' +
+              '<div style="font-size:0.9rem;color:#555;">' + (o.delivery === 'delivery' ? 'Delivery' : 'Pickup') + '</div>' +
+            '</div>';
+          }
+          container.innerHTML = ohtml;
+        }
+      } catch (e) {
+        alert('Error loading products. Please refresh.');
+        console.error(e);
       }
     }
 
     function toggleStatus(id) {
-      const products = getProducts();
-      const p = products.find(x => x.id === id);
-      if (p) {
-        p.available = !p.available;
-        saveProducts(products);
-        loadDashboard();
-        showToast(p.available ? 'Marked as Available' : 'Marked as Sold Out');
+      var products = getProducts();
+      for (var i = 0; i < products.length; i++) {
+        if (products[i].id === id) {
+          products[i].available = !products[i].available;
+          break;
+        }
       }
+      saveProducts(products);
+      loadDashboard();
     }
 
     function saveProduct(id) {
-      const card = document.querySelector(`.product-manage-card[data-id="${id}"]`);
-      const name = card.querySelector('.edit-name').value.trim();
-      const price = parseInt(card.querySelector('.edit-price').value, 10);
+      var card = document.querySelector('.product-manage-card[data-id="' + id + '"]');
+      var name = card.querySelector('.edit-name').value.trim();
+      var price = parseInt(card.querySelector('.edit-price').value, 10);
 
-      if (!name || isNaN(price) || price < 0) {
-        alert('Please enter valid name and price');
+      if (!name || isNaN(price)) {
+        alert('Enter valid name and price');
         return;
       }
 
-      const products = getProducts();
-      const p = products.find(x => x.id === id);
-      if (p) {
-        p.name = name;
-        p.price = price;
-        saveProducts(products);
-        loadDashboard();
-        showToast('Product saved!');
+      var products = getProducts();
+      for (var i = 0; i < products.length; i++) {
+        if (products[i].id === id) {
+          products[i].name = name;
+          products[i].price = price;
+          break;
+        }
       }
+      saveProducts(products);
+      loadDashboard();
+      alert('Saved!');
     }
 
     function resetToDefault() {
-      if (confirm('Reset all products to the original 14 items?')) {
+      if (confirm('Reset all products to original?')) {
         localStorage.removeItem('collins_products');
         loadDashboard();
-        showToast('Products reset to default');
       }
     }
 
     function clearOrders() {
-      if (confirm('Clear all order history?')) {
+      if (confirm('Clear all orders?')) {
         localStorage.removeItem('collins_orders');
         loadDashboard();
-        showToast('Orders cleared');
       }
     }
 
-    // Add New Product
-    let newImageData = '';
-
+    // Add Product
+    var newImageData = '';
     function previewNewImage(e) {
-      const file = e.target.files[0];
+      var file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
+      var reader = new FileReader();
       reader.onload = function(ev) {
         newImageData = ev.target.result;
-        const preview = document.getElementById('new-preview');
+        var preview = document.getElementById('new-preview');
         preview.src = newImageData;
         preview.style.display = 'block';
       };
@@ -294,15 +260,18 @@
     }
 
     function addNewProduct() {
-      const name = document.getElementById('new-name').value.trim();
-      const price = parseInt(document.getElementById('new-price').value, 10);
+      var name = document.getElementById('new-name').value.trim();
+      var price = parseInt(document.getElementById('new-price').value, 10);
 
-      if (!name) { alert('Enter product name'); return; }
-      if (!price || price < 0) { alert('Enter valid price'); return; }
-      if (!newImageData) { alert('Please choose a photo from your gallery'); return; }
+      if (!name) { alert('Enter name'); return; }
+      if (!price) { alert('Enter price'); return; }
+      if (!newImageData) { alert('Choose a photo'); return; }
 
-      const products = getProducts();
-      const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+      var products = getProducts();
+      var newId = 1;
+      for (var i = 0; i < products.length; i++) {
+        if (products[i].id >= newId) newId = products[i].id + 1;
+      }
 
       products.push({
         id: newId,
@@ -320,15 +289,20 @@
       document.getElementById('new-preview').style.display = 'none';
       newImageData = '';
       loadDashboard();
-      showToast('Product added!');
+      alert('Product added!');
     }
 
-    // Auto login
+    // Auto login if already logged in
     if (sessionStorage.getItem('collins_ceo') === 'true') {
       document.getElementById('login-section').style.display = 'none';
       document.getElementById('dash-section').style.display = 'block';
       loadDashboard();
     }
+
+    // Allow Enter key
+    document.getElementById('password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
   </script>
 </body>
 </html>
