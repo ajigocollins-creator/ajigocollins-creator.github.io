@@ -5,6 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CEO Dashboard | Collins Clothing</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .product-manage-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .product-manage-card img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .product-manage-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .product-manage-info input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    .product-manage-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+  </style>
 </head>
 <body class="dashboard-body">
 
@@ -44,26 +81,20 @@
       <!-- ADD NEW PRODUCT -->
       <div class="dash-card">
         <h2>Add New Product</h2>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Choose a photo from your gallery, then enter name and price.</p>
-
-        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
-          <div>
-            <label style="display:block;font-weight:600;margin-bottom:8px;">Product Photo</label>
-            <input type="file" id="new-image" accept="image/*" onchange="previewNewImage(event)">
-            <img id="new-preview" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:10px;">
-          </div>
-          <div style="flex:1;min-width:220px;">
-            <div class="form-group">
-              <label>Product Name</label>
-              <input type="text" id="new-name" placeholder="e.g. Steady Grinding Black Tee">
-            </div>
-            <div class="form-group">
-              <label>Price (₦)</label>
-              <input type="number" id="new-price" value="15000">
-            </div>
-            <button onclick="addNewProduct()" class="save-btn" style="padding:12px 18px;">Add Product</button>
-          </div>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Choose a photo from your gallery</p>
+        <div style="margin-bottom:12px;">
+          <input type="file" id="new-image" accept="image/*" onchange="previewNewImage(event)">
+          <img id="new-preview" style="display:none;width:100px;height:100px;object-fit:cover;border-radius:8px;margin-top:10px;">
         </div>
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" id="new-name" placeholder="e.g. Steady Grinding Black Tee">
+        </div>
+        <div class="form-group">
+          <label>Price (₦)</label>
+          <input type="number" id="new-price" value="15000">
+        </div>
+        <button onclick="addNewProduct()" class="save-btn" style="padding:12px 20px;width:100%;">Add Product</button>
       </div>
 
       <!-- ORDERS -->
@@ -75,29 +106,16 @@
         <div id="orders-list" class="orders-list"></div>
       </div>
 
-      <!-- MANAGE PRODUCTS -->
+      <!-- MANAGE PRODUCTS (Card layout - works better on phone) -->
       <div class="dash-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h2>Manage Products</h2>
           <button onclick="resetToDefault()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Reset to Default</button>
         </div>
         <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">
-          Edit name or price → click <strong>Save</strong>. Tap the status button to switch between Available and Sold Out.
+          Edit name or price → tap <strong>Save</strong>. Tap status to switch Available / Sold Out.
         </p>
-        <div style="overflow-x:auto;">
-          <table class="product-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Product Name</th>
-                <th>Price (₦)</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="product-table-body"></tbody>
-          </table>
-        </div>
+        <div id="product-list"></div>
       </div>
 
     </div>
@@ -118,7 +136,6 @@
 
   <script src="products.js"></script>
   <script>
-    // ========== PASSWORD ==========
     function getPassword() {
       return localStorage.getItem('collins_dash_pass') || 'collins2026';
     }
@@ -160,7 +177,6 @@
       alert('Password changed successfully!');
     }
 
-    // ========== LOAD DASHBOARD ==========
     function loadDashboard() {
       const products = getProducts();
       const available = products.filter(p => p.available).length;
@@ -172,23 +188,25 @@
       document.getElementById('stat-sold').textContent = sold;
       document.getElementById('stat-orders').textContent = orders.length;
 
-      // Render product table
-      const tbody = document.getElementById('product-table-body');
-      tbody.innerHTML = products.map(p => `
-        <tr data-id="${p.id}">
-          <td><img src="${p.image}" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px;"></td>
-          <td><input type="text" class="edit-name" value="${p.name}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;"></td>
-          <td><input type="number" class="edit-price" value="${p.price}" style="width:90px;padding:6px;border:1px solid #ddd;border-radius:4px;"></td>
-          <td>
-            <button class="status-toggle \( {p.available ? 'available' : 'sold'}" onclick="toggleStatus( \){p.id})">
-              ${p.available ? 'Available' : 'Sold Out'}
-            </button>
-          </td>
-          <td><button class="save-btn" onclick="saveProduct(${p.id})">Save</button></td>
-        </tr>
+      // Render products as cards (better for mobile)
+      const list = document.getElementById('product-list');
+      list.innerHTML = products.map(p => `
+        <div class="product-manage-card" data-id="${p.id}">
+          <img src="\( {p.image}" alt=" \){p.name}">
+          <div class="product-manage-info">
+            <input type="text" class="edit-name" value="${p.name}" placeholder="Product name">
+            <input type="number" class="edit-price" value="${p.price}" placeholder="Price">
+            <div class="product-manage-actions">
+              <button class="status-toggle \( {p.available ? 'available' : 'sold'}" onclick="toggleStatus( \){p.id})">
+                ${p.available ? 'Available' : 'Sold Out'}
+              </button>
+              <button class="save-btn" onclick="saveProduct(${p.id})">Save</button>
+            </div>
+          </div>
+        </div>
       `).join('');
 
-      // Render orders
+      // Orders
       const container = document.getElementById('orders-list');
       if (orders.length === 0) {
         container.innerHTML = '<p style="color:#666;padding:10px 0;">No orders yet.</p>';
@@ -211,7 +229,6 @@
       }
     }
 
-    // ========== PRODUCT ACTIONS ==========
     function toggleStatus(id) {
       const products = getProducts();
       const p = products.find(x => x.id === id);
@@ -224,9 +241,9 @@
     }
 
     function saveProduct(id) {
-      const row = document.querySelector(`tr[data-id="${id}"]`);
-      const name = row.querySelector('.edit-name').value.trim();
-      const price = parseInt(row.querySelector('.edit-price').value, 10);
+      const card = document.querySelector(`.product-manage-card[data-id="${id}"]`);
+      const name = card.querySelector('.edit-name').value.trim();
+      const price = parseInt(card.querySelector('.edit-price').value, 10);
 
       if (!name || isNaN(price) || price < 0) {
         alert('Please enter valid name and price');
@@ -240,7 +257,7 @@
         p.price = price;
         saveProducts(products);
         loadDashboard();
-        showToast('Product updated!');
+        showToast('Product saved!');
       }
     }
 
@@ -260,7 +277,7 @@
       }
     }
 
-    // ========== ADD NEW PRODUCT ==========
+    // Add New Product
     let newImageData = '';
 
     function previewNewImage(e) {
@@ -282,7 +299,7 @@
 
       if (!name) { alert('Enter product name'); return; }
       if (!price || price < 0) { alert('Enter valid price'); return; }
-      if (!newImageData) { alert('Please choose a photo'); return; }
+      if (!newImageData) { alert('Please choose a photo from your gallery'); return; }
 
       const products = getProducts();
       const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
@@ -303,7 +320,7 @@
       document.getElementById('new-preview').style.display = 'none';
       newImageData = '';
       loadDashboard();
-      showToast('Product added successfully!');
+      showToast('Product added!');
     }
 
     // Auto login
@@ -314,4 +331,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
