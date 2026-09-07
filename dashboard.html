@@ -3,224 +3,199 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CEO Dashboard | Collins Clothing</title>
+  <title>CEO Dashboard</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .card-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      gap: 12px;
+    }
+    .card-item img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .card-item input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  </style>
 </head>
 <body class="dashboard-body">
 
-  <div id="login-section">
-    <div class="login-box">
-      <h2 style="margin-bottom:8px;">CEO Dashboard</h2>
-      <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Collins Clothing Admin</p>
-      <input type="password" id="password" placeholder="Enter password" onkeypress="if(event.key==='Enter') doLogin()">
-      <button onclick="doLogin()">Login</button>
-      <p style="margin-top:16px;font-size:0.8rem;color:#999;">Contact admin if you forgot the password</p>
-      <p style="margin-top:8px;"><a href="index.html" style="color:#e11d48;font-size:0.9rem;">← Back to Shop</a></p>
-    </div>
+  <div id="login-box" class="login-box" style="margin:80px auto;">
+    <h2>CEO Dashboard</h2>
+    <p style="color:#666;margin-bottom:16px;">Collins Clothing</p>
+    <input id="pass" type="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <p style="margin-top:14px;font-size:13px;color:#888;">Password: collins2026</p>
   </div>
 
-  <div id="dash-section" style="display:none;">
+  <div id="app" style="display:none;">
     <header class="dash-header">
-      <div><strong>Collins Clothing</strong> — CEO Panel</div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <a href="index.html" style="color:#94a3b8;font-size:0.9rem;">View Shop</a>
-        <button onclick="showChangePassword()" style="background:#334155;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Change Password</button>
-        <button onclick="doLogout()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;">Logout</button>
-      </div>
+      <div><strong>Collins Clothing</strong> — CEO</div>
+      <button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 14px;border-radius:6px;">Logout</button>
     </header>
 
     <div class="dash-container">
       <div class="stats-grid">
-        <div class="stat-box"><div class="num" id="stat-total">0</div><div class="label">Total Products</div></div>
-        <div class="stat-box"><div class="num" id="stat-available">0</div><div class="label">Available</div></div>
-        <div class="stat-box"><div class="num" id="stat-sold">0</div><div class="label">Sold Out</div></div>
-        <div class="stat-box"><div class="num" id="stat-orders">0</div><div class="label">Orders</div></div>
+        <div class="stat-box"><div class="num" id="t">0</div><div class="label">Total</div></div>
+        <div class="stat-box"><div class="num" id="a">0</div><div class="label">Available</div></div>
+        <div class="stat-box"><div class="num" id="s">0</div><div class="label">Sold Out</div></div>
+        <div class="stat-box"><div class="num" id="o">0</div><div class="label">Orders</div></div>
       </div>
 
       <div class="dash-card">
         <h2>Add New Product</h2>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Pick a photo from your gallery, then add name and price.</p>
-
-        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
-          <div>
-            <label style="display:block;font-weight:600;margin-bottom:8px;">Product Photo</label>
-            <input type="file" id="new-image" accept="image/*" onchange="previewNewImage(event)">
-            <img id="new-preview" alt="Preview" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:10px;">
-          </div>
-          <div style="flex:1;min-width:220px;">
-            <div class="form-group">
-              <label>Product Name</label>
-              <input type="text" id="new-name" placeholder="e.g. Steady Grinding Black Tee">
-            </div>
-            <div class="form-group">
-              <label>Price (₦)</label>
-              <input type="number" id="new-price" placeholder="15000" value="15000">
-            </div>
-            <button onclick="addNewProduct()" class="save-btn" style="padding:12px 18px;font-size:0.95rem;">Add Product</button>
-          </div>
-        </div>
+        <input type="file" id="img" accept="image/*">
+        <img id="prev" style="display:none;width:90px;height:90px;object-fit:cover;border-radius:8px;margin:10px 0;">
+        <div class="form-group"><label>Name</label><input id="nname" type="text"></div>
+        <div class="form-group"><label>Price (₦)</label><input id="nprice" type="number" value="15000"></div>
+        <button class="save-btn" onclick="addP()" style="width:100%;padding:12px;">Add Product</button>
       </div>
 
       <div class="dash-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <h2>Customer Orders</h2>
-          <button onclick="clearOrders()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Clear All</button>
-        </div>
-        <div id="orders-list" class="orders-list"></div>
+        <h2>Orders</h2>
+        <div id="orders">No orders yet.</div>
       </div>
 
       <div class="dash-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
           <h2>Manage Products</h2>
-          <button onclick="resetToDefault()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Reset to Default</button>
+          <button onclick="resetP()" style="padding:8px 12px;border:1px solid #ddd;background:#fff;border-radius:6px;">Reset</button>
         </div>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">
-          Edit names and prices, then tap <strong>Save</strong>. Toggle Available / Sold Out.
-        </p>
-        <div style="overflow-x:auto;">
-          <table class="product-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Product Name</th>
-                <th>Price (₦)</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="product-table-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="password-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;">
-    <div style="background:white;padding:24px;border-radius:12px;width:90%;max-width:360px;">
-      <h3 style="margin-bottom:16px;">Change Password</h3>
-      <input type="password" id="new-pass" placeholder="New password" style="width:100%;padding:12px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;">
-      <input type="password" id="confirm-pass" placeholder="Confirm new password" style="width:100%;padding:12px;margin-bottom:16px;border:1px solid #ddd;border-radius:8px;">
-      <div style="display:flex;gap:10px;">
-        <button onclick="document.getElementById('password-modal').style.display='none'" style="flex:1;padding:12px;border:1px solid #ddd;background:white;border-radius:8px;">Cancel</button>
-        <button onclick="changePassword()" style="flex:1;padding:12px;background:#e11d48;color:white;border:none;border-radius:8px;font-weight:600;">Save</button>
+        <p style="color:#666;font-size:.9rem;">Edit name/price → Save. Tap status to switch Available / Sold Out.</p>
+        <div id="plist"></div>
       </div>
     </div>
   </div>
 
   <script src="products.js"></script>
-  <script src="dashboard.js"></script>
   <script>
-    let newImageData = '';
+    var imgData = '';
 
-    function getPassword() {
-      return localStorage.getItem('collins_dash_pass') || 'collins2026';
-    }
-
-    function doLogin() {
-      const pass = document.getElementById('password').value;
-      if (pass === getPassword()) {
-        sessionStorage.setItem('collins_ceo', 'true');
-        document.getElementById('login-section').style.display = 'none';
-        document.getElementById('dash-section').style.display = 'block';
-        forceLoad();
+    document.getElementById('loginBtn').onclick = function () {
+      if (document.getElementById('pass').value === 'collins2026') {
+        document.getElementById('login-box').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        draw();
       } else {
-        alert('Wrong password');
+        alert('Wrong password. Use collins2026');
       }
-    }
+    };
 
-    function doLogout() {
-      sessionStorage.removeItem('collins_ceo');
-      location.reload();
-    }
+    document.getElementById('pass').onkeypress = function (e) {
+      if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    };
 
-    function showChangePassword() {
-      document.getElementById('password-modal').style.display = 'flex';
-    }
+    function logout() { location.reload(); }
 
-    function changePassword() {
-      const newPass = document.getElementById('new-pass').value;
-      const confirm = document.getElementById('confirm-pass').value;
-      if (!newPass || newPass.length < 4) {
-        alert('Password must be at least 4 characters');
-        return;
+    function draw() {
+      var products = getProducts();
+      document.getElementById('t').textContent = products.length;
+      document.getElementById('a').textContent = products.filter(function (p) { return p.available; }).length;
+      document.getElementById('s').textContent = products.filter(function (p) { return !p.available; }).length;
+      document.getElementById('o').textContent = getOrders().length;
+
+      var html = '';
+      for (var i = 0; i < products.length; i++) {
+        var p = products[i];
+        html += '<div class="card-item" data-id="' + p.id + '">' +
+          '<img src="' + p.image + '">' +
+          '<div style="flex:1">' +
+            '<input class="en" value="' + p.name.replace(/"/g, '&quot;') + '">' +
+            '<input class="ep" type="number" value="' + p.price + '">' +
+            '<div class="row-actions">' +
+              '<button class="status-toggle ' + (p.available ? 'available' : 'sold') + '" onclick="tog(' + p.id + ')">' + (p.available ? 'Available' : 'Sold Out') + '</button>' +
+              '<button class="save-btn" onclick="sav(' + p.id + ')">Save</button>' +
+            '</div>' +
+          '</div></div>';
       }
-      if (newPass !== confirm) {
-        alert('Passwords do not match');
-        return;
-      }
-      localStorage.setItem('collins_dash_pass', newPass);
-      document.getElementById('password-modal').style.display = 'none';
-      alert('Password changed successfully!');
-    }
+      document.getElementById('plist').innerHTML = html;
 
-    function previewNewImage(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        newImageData = ev.target.result;
-        const preview = document.getElementById('new-preview');
-        preview.src = newImageData;
-        preview.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function addNewProduct() {
-      const name = document.getElementById('new-name').value.trim();
-      const price = parseInt(document.getElementById('new-price').value, 10);
-
-      if (!name) {
-        alert('Enter a product name');
-        return;
-      }
-      if (!price || price < 0) {
-        alert('Enter a valid price');
-        return;
-      }
-      if (!newImageData) {
-        alert('Please choose a photo from your gallery');
-        return;
-      }
-
-      const products = getProducts();
-      const newId = products.length ? Math.max.apply(null, products.map(p => p.id)) + 1 : 1;
-
-      products.push({
-        id: newId,
-        name: name,
-        brand: 'COLLINS CLOTHING',
-        price: price,
-        image: newImageData,
-        available: true
-      });
-
-      saveProducts(products);
-      document.getElementById('new-name').value = '';
-      document.getElementById('new-price').value = '15000';
-      document.getElementById('new-image').value = '';
-      document.getElementById('new-preview').style.display = 'none';
-      newImageData = '';
-      forceLoad();
-      alert('Product added! Open the shop page to see it.');
-    }
-
-    function forceLoad() {
-      setTimeout(function() {
-        if (typeof renderDashboard === 'function') renderDashboard();
-        if (typeof renderOrders === 'function') renderOrders();
-        const total = document.getElementById('stat-total');
-        if (total && total.textContent === '0') {
-          localStorage.removeItem('collins_products');
-          if (typeof renderDashboard === 'function') renderDashboard();
+      var orders = getOrders();
+      if (!orders.length) {
+        document.getElementById('orders').innerHTML = 'No orders yet.';
+      } else {
+        var oh = '';
+        for (var j = 0; j < orders.length; j++) {
+          var x = orders[j];
+          oh += '<div class="order-card"><strong>' + x.customer.name + '</strong> • ' + x.customer.phone + '<br>' + formatPrice(x.total) + '</div>';
         }
-      }, 300);
+        document.getElementById('orders').innerHTML = oh;
+      }
     }
 
-    if (sessionStorage.getItem('collins_ceo') === 'true') {
-      document.getElementById('login-section').style.display = 'none';
-      document.getElementById('dash-section').style.display = 'block';
-      forceLoad();
+    function tog(id) {
+      var products = getProducts();
+      for (var i = 0; i < products.length; i++) {
+        if (products[i].id === id) products[i].available = !products[i].available;
+      }
+      saveProducts(products);
+      draw();
+    }
+
+    function sav(id) {
+      var card = document.querySelector('.card-item[data-id="' + id + '"]');
+      var name = card.querySelector('.en').value.trim();
+      var price = parseInt(card.querySelector('.ep').value, 10);
+      if (!name || isNaN(price)) { alert('Enter name and price'); return; }
+      var products = getProducts();
+      for (var i = 0; i < products.length; i++) {
+        if (products[i].id === id) { products[i].name = name; products[i].price = price; }
+      }
+      saveProducts(products);
+      draw();
+      alert('Saved');
+    }
+
+    function resetP() {
+      if (confirm('Reset products?')) {
+        localStorage.removeItem('collins_products');
+        draw();
+      }
+    }
+
+    document.getElementById('img').onchange = function (e) {
+      var f = e.target.files[0];
+      if (!f) return;
+      var r = new FileReader();
+      r.onload = function (ev) {
+        imgData = ev.target.result;
+        var p = document.getElementById('prev');
+        p.src = imgData;
+        p.style.display = 'block';
+      };
+      r.readAsDataURL(f);
+    };
+
+    function addP() {
+      var name = document.getElementById('nname').value.trim();
+      var price = parseInt(document.getElementById('nprice').value, 10);
+      if (!name || !price || !imgData) { alert('Add name, price and photo'); return; }
+      var products = getProducts();
+      var id = 1;
+      for (var i = 0; i < products.length; i++) if (products[i].id >= id) id = products[i].id + 1;
+      products.push({ id: id, name: name, brand: 'COLLINS CLOTHING', price: price, image: imgData, available: true });
+      saveProducts(products);
+      document.getElementById('nname').value = '';
+      document.getElementById('nprice').value = '15000';
+      document.getElementById('img').value = '';
+      document.getElementById('prev').style.display = 'none';
+      imgData = '';
+      draw();
+      alert('Added');
     }
   </script>
 </body>
