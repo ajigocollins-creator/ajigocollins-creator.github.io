@@ -8,6 +8,7 @@
 </head>
 <body class="dashboard-body">
 
+  <!-- LOGIN -->
   <div id="login-section">
     <div class="login-box">
       <h2 style="margin-bottom:8px;">CEO Dashboard</h2>
@@ -19,6 +20,7 @@
     </div>
   </div>
 
+  <!-- DASHBOARD -->
   <div id="dash-section" style="display:none;">
     <header class="dash-header">
       <div><strong>Collins Clothing</strong> — CEO Panel</div>
@@ -30,6 +32,8 @@
     </header>
 
     <div class="dash-container">
+
+      <!-- STATS -->
       <div class="stats-grid">
         <div class="stat-box"><div class="num" id="stat-total">0</div><div class="label">Total Products</div></div>
         <div class="stat-box"><div class="num" id="stat-available">0</div><div class="label">Available</div></div>
@@ -37,15 +41,16 @@
         <div class="stat-box"><div class="num" id="stat-orders">0</div><div class="label">Orders</div></div>
       </div>
 
+      <!-- ADD NEW PRODUCT -->
       <div class="dash-card">
         <h2>Add New Product</h2>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Pick a photo from your gallery, then add name and price.</p>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Choose a photo from your gallery, then enter name and price.</p>
 
         <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
           <div>
             <label style="display:block;font-weight:600;margin-bottom:8px;">Product Photo</label>
             <input type="file" id="new-image" accept="image/*" onchange="previewNewImage(event)">
-            <img id="new-preview" alt="Preview" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:10px;">
+            <img id="new-preview" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:10px;">
           </div>
           <div style="flex:1;min-width:220px;">
             <div class="form-group">
@@ -54,13 +59,14 @@
             </div>
             <div class="form-group">
               <label>Price (₦)</label>
-              <input type="number" id="new-price" placeholder="15000" value="15000">
+              <input type="number" id="new-price" value="15000">
             </div>
-            <button onclick="addNewProduct()" class="save-btn" style="padding:12px 18px;font-size:0.95rem;">Add Product</button>
+            <button onclick="addNewProduct()" class="save-btn" style="padding:12px 18px;">Add Product</button>
           </div>
         </div>
       </div>
 
+      <!-- ORDERS -->
       <div class="dash-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h2>Customer Orders</h2>
@@ -69,13 +75,14 @@
         <div id="orders-list" class="orders-list"></div>
       </div>
 
+      <!-- MANAGE PRODUCTS -->
       <div class="dash-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h2>Manage Products</h2>
           <button onclick="resetToDefault()" style="padding:8px 14px;border:1px solid #ddd;background:white;border-radius:6px;cursor:pointer;font-size:0.85rem;">Reset to Default</button>
         </div>
         <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">
-          Edit names and prices, then tap <strong>Save</strong>. Toggle Available / Sold Out.
+          Edit name or price → click <strong>Save</strong>. Tap the status button to switch between Available and Sold Out.
         </p>
         <div style="overflow-x:auto;">
           <table class="product-table">
@@ -92,9 +99,11 @@
           </table>
         </div>
       </div>
+
     </div>
   </div>
 
+  <!-- CHANGE PASSWORD MODAL -->
   <div id="password-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;">
     <div style="background:white;padding:24px;border-radius:12px;width:90%;max-width:360px;">
       <h3 style="margin-bottom:16px;">Change Password</h3>
@@ -108,10 +117,8 @@
   </div>
 
   <script src="products.js"></script>
-  <script src="dashboard.js"></script>
   <script>
-    let newImageData = '';
-
+    // ========== PASSWORD ==========
     function getPassword() {
       return localStorage.getItem('collins_dash_pass') || 'collins2026';
     }
@@ -122,7 +129,7 @@
         sessionStorage.setItem('collins_ceo', 'true');
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('dash-section').style.display = 'block';
-        forceLoad();
+        loadDashboard();
       } else {
         alert('Wrong password');
       }
@@ -153,6 +160,109 @@
       alert('Password changed successfully!');
     }
 
+    // ========== LOAD DASHBOARD ==========
+    function loadDashboard() {
+      const products = getProducts();
+      const available = products.filter(p => p.available).length;
+      const sold = products.filter(p => !p.available).length;
+      const orders = getOrders();
+
+      document.getElementById('stat-total').textContent = products.length;
+      document.getElementById('stat-available').textContent = available;
+      document.getElementById('stat-sold').textContent = sold;
+      document.getElementById('stat-orders').textContent = orders.length;
+
+      // Render product table
+      const tbody = document.getElementById('product-table-body');
+      tbody.innerHTML = products.map(p => `
+        <tr data-id="${p.id}">
+          <td><img src="${p.image}" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px;"></td>
+          <td><input type="text" class="edit-name" value="${p.name}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;"></td>
+          <td><input type="number" class="edit-price" value="${p.price}" style="width:90px;padding:6px;border:1px solid #ddd;border-radius:4px;"></td>
+          <td>
+            <button class="status-toggle \( {p.available ? 'available' : 'sold'}" onclick="toggleStatus( \){p.id})">
+              ${p.available ? 'Available' : 'Sold Out'}
+            </button>
+          </td>
+          <td><button class="save-btn" onclick="saveProduct(${p.id})">Save</button></td>
+        </tr>
+      `).join('');
+
+      // Render orders
+      const container = document.getElementById('orders-list');
+      if (orders.length === 0) {
+        container.innerHTML = '<p style="color:#666;padding:10px 0;">No orders yet.</p>';
+      } else {
+        container.innerHTML = orders.map(o => `
+          <div class="order-card">
+            <div class="order-header">
+              <span>#${o.id} • ${o.date}</span>
+              <span style="color:#e11d48;">${formatPrice(o.total)}</span>
+            </div>
+            <div><strong>${o.customer.name}</strong> • ${o.customer.phone}</div>
+            <div style="font-size:0.9rem;color:#555;">
+              ${o.delivery === 'delivery' ? '🚚 Delivery' : '🏪 Pickup'}
+              ${o.customer.address && o.customer.address !== 'Pickup' ? ' • ' + o.customer.address : ''}
+            </div>
+            ${o.customer.note ? `<div style="font-size:0.85rem;color:#888;margin-top:4px;">Note: ${o.customer.note}</div>` : ''}
+            <div class="order-items">\( {o.items.map(i => ` \){i.qty}× ${i.name}`).join(' • ')}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // ========== PRODUCT ACTIONS ==========
+    function toggleStatus(id) {
+      const products = getProducts();
+      const p = products.find(x => x.id === id);
+      if (p) {
+        p.available = !p.available;
+        saveProducts(products);
+        loadDashboard();
+        showToast(p.available ? 'Marked as Available' : 'Marked as Sold Out');
+      }
+    }
+
+    function saveProduct(id) {
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      const name = row.querySelector('.edit-name').value.trim();
+      const price = parseInt(row.querySelector('.edit-price').value, 10);
+
+      if (!name || isNaN(price) || price < 0) {
+        alert('Please enter valid name and price');
+        return;
+      }
+
+      const products = getProducts();
+      const p = products.find(x => x.id === id);
+      if (p) {
+        p.name = name;
+        p.price = price;
+        saveProducts(products);
+        loadDashboard();
+        showToast('Product updated!');
+      }
+    }
+
+    function resetToDefault() {
+      if (confirm('Reset all products to the original 14 items?')) {
+        localStorage.removeItem('collins_products');
+        loadDashboard();
+        showToast('Products reset to default');
+      }
+    }
+
+    function clearOrders() {
+      if (confirm('Clear all order history?')) {
+        localStorage.removeItem('collins_orders');
+        loadDashboard();
+        showToast('Orders cleared');
+      }
+    }
+
+    // ========== ADD NEW PRODUCT ==========
+    let newImageData = '';
+
     function previewNewImage(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -170,21 +280,12 @@
       const name = document.getElementById('new-name').value.trim();
       const price = parseInt(document.getElementById('new-price').value, 10);
 
-      if (!name) {
-        alert('Enter a product name');
-        return;
-      }
-      if (!price || price < 0) {
-        alert('Enter a valid price');
-        return;
-      }
-      if (!newImageData) {
-        alert('Please choose a photo from your gallery');
-        return;
-      }
+      if (!name) { alert('Enter product name'); return; }
+      if (!price || price < 0) { alert('Enter valid price'); return; }
+      if (!newImageData) { alert('Please choose a photo'); return; }
 
       const products = getProducts();
-      const newId = products.length ? Math.max.apply(null, products.map(p => p.id)) + 1 : 1;
+      const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
 
       products.push({
         id: newId,
@@ -201,27 +302,16 @@
       document.getElementById('new-image').value = '';
       document.getElementById('new-preview').style.display = 'none';
       newImageData = '';
-      forceLoad();
-      alert('Product added! Open the shop page to see it.');
+      loadDashboard();
+      showToast('Product added successfully!');
     }
 
-    function forceLoad() {
-      setTimeout(function() {
-        if (typeof renderDashboard === 'function') renderDashboard();
-        if (typeof renderOrders === 'function') renderOrders();
-        const total = document.getElementById('stat-total');
-        if (total && total.textContent === '0') {
-          localStorage.removeItem('collins_products');
-          if (typeof renderDashboard === 'function') renderDashboard();
-        }
-      }, 300);
-    }
-
+    // Auto login
     if (sessionStorage.getItem('collins_ceo') === 'true') {
       document.getElementById('login-section').style.display = 'none';
       document.getElementById('dash-section').style.display = 'block';
-      forceLoad();
+      loadDashboard();
     }
   </script>
 </body>
-</html>
+  </html>
