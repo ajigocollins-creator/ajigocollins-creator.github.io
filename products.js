@@ -1,4 +1,4 @@
-// Collins Clothing - Product Data, Cart & Checkout
+// Collins Clothing - Supabase Products, Cart & Checkout
 
 const STORE = {
   name: "Collins Clothing",
@@ -13,153 +13,90 @@ const STORE = {
   }
 };
 
+// ================= SUPABASE =================
+
+const shopSupabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
 // ================= PRODUCTS =================
 
-const DEFAULT_PRODUCTS = [
-  {
-    id: 1,
-    name: "Slide Skate Blue Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "slide-skate-blue.jpg",
-    available: true
-  },
-  {
-    id: 2,
-    name: "Bear Outline Maroon Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "bear-outline-maroon.jpg",
-    available: true
-  },
-  {
-    id: 3,
-    name: "Smile Born To Skate Orange Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "smile-skate-orange.jpg",
-    available: true
-  },
-  {
-    id: 4,
-    name: "Dab Guy Black Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "dab-guy-black.jpg",
-    available: true
-  },
-  {
-    id: 5,
-    name: "Comic Boom White Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "comic-boom-white.jpg",
-    available: true
-  },
-  {
-    id: 6,
-    name: "Skull Hand White Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "skull-hand-white.jpg",
-    available: true
-  },
-  {
-    id: 7,
-    name: "Donald Duck White Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "donald-duck-white.jpg",
-    available: true
-  },
-  {
-    id: 8,
-    name: "Steady Grinding Black Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "steady-grinder-black.png",
-    available: true
-  },
-  {
-    id: 9,
-    name: "Champ Brown Patch Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "champ-brown.jpg",
-    available: true
-  },
-  {
-    id: 10,
-    name: "Red Jersey 98 Baseball Shirt",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "red-jersey-98.jpg",
-    available: true
-  },
-  {
-    id: 11,
-    name: "Risk Takers Yellow Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "risk-takers-yellow.jpg",
-    available: true
-  },
-  {
-    id: 12,
-    name: "Basketball 23 Beige Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "basketball-23-beige.jpg",
-    available: true
-  },
-  {
-    id: 13,
-    name: "Steady Grinding Jeep White Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "steady-jeep-white.png",
-    available: true
-  },
-  {
-    id: 14,
-    name: "Enjoy The Play Black Tee",
-    brand: "COLLINS CLOTHING",
-    price: 15000,
-    image: "enjoy-play-black.jpg",
-    available: true
+let PRODUCTS = [];
+
+// Load products from Supabase
+async function loadProductsFromSupabase() {
+
+  const grid = document.getElementById("product-grid");
+
+  if (grid) {
+    grid.innerHTML = `
+      <p style="
+        grid-column:1/-1;
+        text-align:center;
+        padding:40px;
+        color:#666;
+      ">
+        Loading products...
+      </p>
+    `;
   }
-];
 
-// ================= DATA =================
+  const { data, error } = await shopSupabase
+    .from("products")
+    .select("*")
+    .order("created_at", {
+      ascending: false
+    });
 
-function getProducts() {
-  const stored = localStorage.getItem("collins_products");
+  if (error) {
 
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch (error) {
-      console.log("Could not load saved products.");
+    console.error("Supabase product error:", error);
+
+    if (grid) {
+      grid.innerHTML = `
+        <p style="
+          grid-column:1/-1;
+          text-align:center;
+          padding:40px;
+          color:#dc2626;
+        ">
+          Unable to load products.
+        </p>
+      `;
     }
+
+    return;
   }
 
-  return [...DEFAULT_PRODUCTS];
+  PRODUCTS = (data || []).map(product => ({
+    id: product.id,
+    name: product.name,
+    brand: product.brand || "COLLINS CLOTHING",
+    price: Number(product.price) || 0,
+    image: product.image_url || "",
+    available: product.available !== false
+  }));
+
+  renderProducts();
+
+  updateCartCount();
 }
 
-function saveProducts(products) {
-  localStorage.setItem(
-    "collins_products",
-    JSON.stringify(products)
-  );
-}
+// ================= CART STORAGE =================
 
 function getCart() {
-  const stored = localStorage.getItem("collins_cart");
+
+  const stored =
+    localStorage.getItem("collins_cart");
 
   if (stored) {
+
     try {
       return JSON.parse(stored);
-    } catch (error) {
+    }
+
+    catch (error) {
       console.log("Could not load cart.");
     }
   }
@@ -168,6 +105,7 @@ function getCart() {
 }
 
 function saveCart(cart) {
+
   localStorage.setItem(
     "collins_cart",
     JSON.stringify(cart)
@@ -176,60 +114,45 @@ function saveCart(cart) {
   updateCartCount();
 }
 
-function getOrders() {
-  const stored = localStorage.getItem("collins_orders");
-
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch (error) {
-      console.log("Could not load orders.");
-    }
-  }
-
-  return [];
-}
-
-function saveOrder(order) {
-  const orders = getOrders();
-
-  orders.unshift(order);
-
-  localStorage.setItem(
-    "collins_orders",
-    JSON.stringify(orders)
-  );
-}
-
 // ================= CART =================
 
 function addToCart(productId) {
-  const products = getProducts();
 
-  const product = products.find(
-    p => p.id === productId
+  const product = PRODUCTS.find(
+    p => String(p.id) === String(productId)
   );
 
   if (!product || !product.available) {
+
     showToast("This item is sold out");
+
     return;
   }
 
   let cart = getCart();
 
   const existing = cart.find(
-    item => item.id === productId
+    item => String(item.id) === String(productId)
   );
 
   if (existing) {
+
     existing.qty += 1;
+
   } else {
+
     cart.push({
+
       id: product.id,
+
       name: product.name,
+
       price: product.price,
+
       image: product.image,
+
       qty: 1
+
     });
   }
 
@@ -241,10 +164,12 @@ function addToCart(productId) {
 }
 
 function removeFromCart(productId) {
+
   let cart = getCart();
 
   cart = cart.filter(
-    item => item.id !== productId
+    item =>
+      String(item.id) !== String(productId)
   );
 
   saveCart(cart);
@@ -253,18 +178,23 @@ function removeFromCart(productId) {
 }
 
 function updateQty(productId, delta) {
+
   let cart = getCart();
 
   const item = cart.find(
-    i => i.id === productId
+    i =>
+      String(i.id) === String(productId)
   );
 
   if (item) {
+
     item.qty += delta;
 
     if (item.qty <= 0) {
+
       cart = cart.filter(
-        i => i.id !== productId
+        i =>
+          String(i.id) !== String(productId)
       );
     }
 
@@ -275,6 +205,7 @@ function updateQty(productId, delta) {
 }
 
 function updateCartCount() {
+
   const cart = getCart();
 
   const total = cart.reduce(
@@ -285,23 +216,32 @@ function updateCartCount() {
   document
     .querySelectorAll(".cart-count")
     .forEach(button => {
+
       button.textContent = total;
 
       button.style.display =
         total > 0 ? "flex" : "none";
+
     });
 }
 
 function formatPrice(amount) {
+
   return "₦" +
     Number(amount).toLocaleString("en-NG");
+
 }
 
 function showToast(message) {
-  let toast = document.querySelector(".toast");
+
+  let toast =
+    document.querySelector(".toast");
 
   if (!toast) {
-    toast = document.createElement("div");
+
+    toast =
+      document.createElement("div");
+
     toast.className = "toast";
 
     document.body.appendChild(toast);
@@ -312,33 +252,45 @@ function showToast(message) {
   toast.classList.add("show");
 
   setTimeout(() => {
+
     toast.classList.remove("show");
+
   }, 2500);
 }
 
 // ================= RENDER PRODUCTS =================
 
-function renderProducts(filter = "all") {
+let currentFilter = "all";
+
+function renderProducts(filter = currentFilter) {
+
+  currentFilter = filter;
+
   const grid =
     document.getElementById("product-grid");
 
   if (!grid) return;
 
-  let products = getProducts();
+  let products = [...PRODUCTS];
 
   if (filter === "available") {
-    products = products.filter(
-      p => p.available
-    );
+
+    products =
+      products.filter(
+        p => p.available
+      );
   }
 
   if (filter === "sold") {
-    products = products.filter(
-      p => !p.available
-    );
+
+    products =
+      products.filter(
+        p => !p.available
+      );
   }
 
   if (products.length === 0) {
+
     grid.innerHTML = `
       <p style="
         grid-column:1/-1;
@@ -353,100 +305,143 @@ function renderProducts(filter = "all") {
     return;
   }
 
-  grid.innerHTML = products.map(product => `
-    <div class="product-card ${
-      product.available ? "" : "sold-out"
-    }">
+  grid.innerHTML =
+    products.map(product => `
 
-      <div class="product-image-wrap">
+      <div class="product-card ${
+        product.available ? "" : "sold-out"
+      }">
 
-        <img
-          src="${product.image}"
-          alt="${product.name}"
-          loading="lazy"
-          onerror="this.style.display='none'; this.parentElement.classList.add('image-error');"
-        >
+        <div class="product-image-wrap">
 
-        <button
-          class="wishlist-btn"
-          onclick="toggleWishlist(this)"
-          title="Wishlist"
-        >
-          ♡
-        </button>
-
-        ${
-          !product.available
-            ? '<span class="sold-badge">SOLD OUT</span>'
-            : ""
-        }
-
-      </div>
-
-      <div class="product-info">
-
-        <div class="brand-name">
-          ${product.brand}
-        </div>
-
-        <div class="product-title">
-          ${product.name}
-        </div>
-
-        <div class="product-price">
-          ${formatPrice(product.price)}
-        </div>
-
-        <button
-          class="add-to-cart"
-          onclick="addToCart(${product.id})"
-          ${product.available ? "" : "disabled"}
-        >
           ${
-            product.available
+            product.image
+            ? `
+              <img
+                src="${escapeHTML(product.image)}"
+                alt="${escapeHTML(product.name)}"
+                loading="lazy"
+                onerror="
+                  this.style.display='none';
+                  this.parentElement.classList.add('image-error');
+                "
+              >
+            `
+            : `
+              <div style="
+                height:100%;
+                min-height:220px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                background:#eee;
+                color:#666;
+              ">
+                No image
+              </div>
+            `
+          }
+
+          <button
+            class="wishlist-btn"
+            onclick="toggleWishlist(this)"
+            title="Wishlist"
+          >
+            ♡
+          </button>
+
+          ${
+            !product.available
+            ? '<span class="sold-badge">SOLD OUT</span>'
+            : ''
+          }
+
+        </div>
+
+        <div class="product-info">
+
+          <div class="brand-name">
+            ${escapeHTML(product.brand)}
+          </div>
+
+          <div class="product-title">
+            ${escapeHTML(product.name)}
+          </div>
+
+          <div class="product-price">
+            ${formatPrice(product.price)}
+          </div>
+
+          <button
+            class="add-to-cart"
+            onclick="addToCart(${JSON.stringify(product.id)})"
+            ${product.available ? "" : "disabled"}
+          >
+            ${
+              product.available
               ? "Add to Cart"
               : "Sold Out"
-          }
-        </button>
+            }
+          </button>
+
+        </div>
 
       </div>
 
-    </div>
-  `).join("");
+    `).join("");
+}
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
 }
 
 function toggleWishlist(button) {
+
   button.classList.toggle("active");
 
   button.textContent =
     button.classList.contains("active")
-      ? "♥"
-      : "♡";
+    ? "♥"
+    : "♡";
 }
 
 // ================= CART UI =================
 
 function openCart() {
+
   const overlay =
     document.getElementById("cart-overlay");
 
   if (overlay) {
+
     overlay.classList.add("open");
+
   }
 
   renderCart();
 }
 
 function closeCart() {
+
   const overlay =
     document.getElementById("cart-overlay");
 
   if (overlay) {
+
     overlay.classList.remove("open");
+
   }
 }
 
 function renderCart() {
+
   const container =
     document.getElementById("cart-items");
 
@@ -458,8 +453,11 @@ function renderCart() {
   const cart = getCart();
 
   if (cart.length === 0) {
+
     container.innerHTML = `
+
       <div class="empty-cart">
+
         <p>Your cart is empty</p>
 
         <p style="
@@ -468,75 +466,85 @@ function renderCart() {
         ">
           Add some tees!
         </p>
+
       </div>
+
     `;
 
     if (footer) {
+
       footer.style.display = "none";
+
     }
 
     return;
   }
 
   if (footer) {
+
     footer.style.display = "block";
+
   }
 
-  container.innerHTML = cart.map(item => `
-    <div class="cart-item">
+  container.innerHTML =
+    cart.map(item => `
 
-      <img
-        src="${item.image}"
-        alt="${item.name}"
-      >
+      <div class="cart-item">
 
-      <div class="cart-item-info">
-
-        <div class="cart-item-title">
-          ${item.name}
-        </div>
-
-        <div class="cart-item-price">
-          ${formatPrice(item.price)}
-        </div>
-
-        <div class="cart-item-qty">
-
-          <button
-            class="qty-btn"
-            onclick="updateQty(${item.id}, -1)"
-          >
-            −
-          </button>
-
-          <span>${item.qty}</span>
-
-          <button
-            class="qty-btn"
-            onclick="updateQty(${item.id}, 1)"
-          >
-            +
-          </button>
-
-        </div>
-
-        <button
-          class="remove-item"
-          onclick="removeFromCart(${item.id})"
+        <img
+          src="${escapeHTML(item.image)}"
+          alt="${escapeHTML(item.name)}"
         >
-          Remove
-        </button>
+
+        <div class="cart-item-info">
+
+          <div class="cart-item-title">
+            ${escapeHTML(item.name)}
+          </div>
+
+          <div class="cart-item-price">
+            ${formatPrice(item.price)}
+          </div>
+
+          <div class="cart-item-qty">
+
+            <button
+              class="qty-btn"
+              onclick="updateQty(${JSON.stringify(item.id)}, -1)"
+            >
+              −
+            </button>
+
+            <span>${item.qty}</span>
+
+            <button
+              class="qty-btn"
+              onclick="updateQty(${JSON.stringify(item.id)}, 1)"
+            >
+              +
+            </button>
+
+          </div>
+
+          <button
+            class="remove-item"
+            onclick="removeFromCart(${JSON.stringify(item.id)})"
+          >
+            Remove
+          </button>
+
+        </div>
 
       </div>
 
-    </div>
-  `).join("");
+    `).join("");
 
-  const total = cart.reduce(
-    (sum, item) =>
-      sum + (item.price * item.qty),
-    0
-  );
+  const total =
+    cart.reduce(
+      (sum, item) =>
+        sum + (item.price * item.qty),
+      0
+    );
 
   const totalElement =
     document.getElementById(
@@ -544,8 +552,10 @@ function renderCart() {
     );
 
   if (totalElement) {
+
     totalElement.textContent =
       formatPrice(total);
+
   }
 }
 
@@ -554,6 +564,7 @@ function renderCart() {
 const DELIVERY_FEE = 2000;
 
 function getSelectedDelivery() {
+
   const selected =
     document.querySelector(
       'input[name="delivery"]:checked'
@@ -565,55 +576,37 @@ function getSelectedDelivery() {
 }
 
 function updateCheckoutTotal() {
+
   const cart = getCart();
 
-  const subtotal = cart.reduce(
-    (sum, item) =>
-      sum + (item.price * item.qty),
-    0
-  );
+  const subtotal =
+    cart.reduce(
+      (sum, item) =>
+        sum + (item.price * item.qty),
+      0
+    );
 
   const deliveryType =
     getSelectedDelivery();
 
   const deliveryFee =
     deliveryType === "delivery"
-      ? DELIVERY_FEE
-      : 0;
+    ? DELIVERY_FEE
+    : 0;
 
   const total =
     subtotal + deliveryFee;
-
-  const subtotalElement =
-    document.getElementById(
-      "checkout-subtotal"
-    );
-
-  const deliveryElement =
-    document.getElementById(
-      "checkout-delivery"
-    );
 
   const totalElement =
     document.getElementById(
       "checkout-total"
     );
 
-  if (subtotalElement) {
-    subtotalElement.textContent =
-      formatPrice(subtotal);
-  }
-
-  if (deliveryElement) {
-    deliveryElement.textContent =
-      deliveryType === "delivery"
-        ? formatPrice(DELIVERY_FEE)
-        : "Free";
-  }
-
   if (totalElement) {
+
     totalElement.textContent =
       formatPrice(total);
+
   }
 
   const addressGroup =
@@ -629,30 +622,43 @@ function updateCheckoutTotal() {
   if (deliveryType === "pickup") {
 
     if (addressGroup) {
-      addressGroup.style.display = "none";
+
+      addressGroup.style.display =
+        "none";
+
     }
 
     if (addressInput) {
+
       addressInput.required = false;
+
     }
 
   } else {
 
     if (addressGroup) {
-      addressGroup.style.display = "block";
+
+      addressGroup.style.display =
+        "block";
+
     }
 
     if (addressInput) {
+
       addressInput.required = true;
+
     }
   }
 }
 
 function openCheckout() {
+
   const cart = getCart();
 
   if (cart.length === 0) {
+
     showToast("Your cart is empty");
+
     return;
   }
 
@@ -662,7 +668,9 @@ function openCheckout() {
     );
 
   if (modal) {
+
     modal.classList.add("open");
+
   }
 
   updateCheckoutTotal();
@@ -671,19 +679,23 @@ function openCheckout() {
 }
 
 function closeCheckout() {
+
   const modal =
     document.getElementById(
       "checkout-modal"
     );
 
   if (modal) {
+
     modal.classList.remove("open");
+
   }
 }
 
 // ================= PLACE ORDER =================
 
-function placeOrder(event) {
+async function placeOrder(event) {
+
   event.preventDefault();
 
   const name =
@@ -710,6 +722,7 @@ function placeOrder(event) {
     getSelectedDelivery();
 
   if (!name || !phone) {
+
     showToast(
       "Please fill name and phone number"
     );
@@ -721,6 +734,7 @@ function placeOrder(event) {
     deliveryType === "delivery" &&
     !address
   ) {
+
     showToast(
       "Please enter delivery address"
     );
@@ -730,31 +744,40 @@ function placeOrder(event) {
 
   const cart = getCart();
 
-  const subtotal = cart.reduce(
-    (sum, item) =>
-      sum + (item.price * item.qty),
-    0
-  );
+  const subtotal =
+    cart.reduce(
+      (sum, item) =>
+        sum + (item.price * item.qty),
+      0
+    );
 
   const deliveryFee =
     deliveryType === "delivery"
-      ? DELIVERY_FEE
-      : 0;
+    ? DELIVERY_FEE
+    : 0;
 
   const total =
     subtotal + deliveryFee;
 
+  // Save order locally for now
   const order = {
+
     id: Date.now(),
 
-    date: new Date()
-      .toLocaleString("en-NG"),
+    date:
+      new Date().toLocaleString("en-NG"),
 
     customer: {
+
       name: name,
+
       phone: phone,
-      address: address || "Pickup",
+
+      address:
+        address || "Pickup",
+
       note: note
+
     },
 
     delivery: deliveryType,
@@ -768,9 +791,32 @@ function placeOrder(event) {
     total: total,
 
     status: "pending"
+
   };
 
-  saveOrder(order);
+  let orders = [];
+
+  try {
+
+    orders =
+      JSON.parse(
+        localStorage.getItem(
+          "collins_orders"
+        )
+      ) || [];
+
+  } catch (error) {
+
+    orders = [];
+
+  }
+
+  orders.unshift(order);
+
+  localStorage.setItem(
+    "collins_orders",
+    JSON.stringify(orders)
+  );
 
   saveCart([]);
 
@@ -784,7 +830,9 @@ function placeOrder(event) {
     );
 
   if (form) {
+
     form.reset();
+
   }
 
   const pickupRadio =
@@ -793,27 +841,28 @@ function placeOrder(event) {
     );
 
   if (pickupRadio) {
+
     pickupRadio.checked = true;
+
   }
 
   showToast(
     "Order placed! Opening WhatsApp..."
   );
 
-  const itemsText = cart
-    .map(item =>
+  const itemsText =
+    cart.map(item =>
       `• ${item.qty}x ${item.name} - ${formatPrice(
         item.price * item.qty
       )}`
-    )
-    .join("\n");
+    ).join("\n");
 
   const deliveryText =
     deliveryType === "delivery"
-      ? `Delivery (+${formatPrice(
-          DELIVERY_FEE
-        )})\nAddress: ${address}`
-      : "Pickup (Free)";
+    ? `Delivery (+${formatPrice(
+        DELIVERY_FEE
+      )})\nAddress: ${address}`
+    : "Pickup (Free)";
 
   const message =
     `*NEW ORDER - Collins Clothing*\n\n` +
@@ -834,16 +883,16 @@ function placeOrder(event) {
 
     `Delivery: ${
       deliveryType === "delivery"
-        ? formatPrice(DELIVERY_FEE)
-        : "Free"
+      ? formatPrice(DELIVERY_FEE)
+      : "Free"
     }\n` +
 
     `*Total: ${formatPrice(total)}*\n\n` +
 
     (
       note
-        ? `Note: ${note}\n\n`
-        : ""
+      ? `Note: ${note}\n\n`
+      : ""
     ) +
 
     `I will transfer to:\n` +
@@ -860,11 +909,32 @@ function placeOrder(event) {
     }`;
 
   setTimeout(() => {
+
     window.open(
       whatsappURL,
       "_blank"
     );
+
   }, 600);
+}
+
+// ================= FILTER =================
+
+function setFilter(filter, btn) {
+
+  document
+    .querySelectorAll(".filter-btn")
+    .forEach(b =>
+      b.classList.remove("active")
+    );
+
+  if (btn) {
+
+    btn.classList.add("active");
+
+  }
+
+  renderProducts(filter);
 }
 
 // ================= INITIALIZE =================
@@ -873,17 +943,11 @@ document.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    if (
-      document.getElementById(
-        "product-grid"
-      )
-    ) {
-      renderProducts();
+    loadProductsFromSupabase();
 
-      updateCartCount();
-    }
+    updateCartCount();
 
-    // Set correct checkout state
     updateCheckoutTotal();
+
   }
 );
