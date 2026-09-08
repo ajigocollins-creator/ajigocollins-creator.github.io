@@ -6,99 +6,76 @@
   <title>CEO Dashboard | Collins Clothing</title>
   <link rel="stylesheet" href="styles.css">
   <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #f1f5f9; }
+    .login-box {
+      max-width: 380px; margin: 80px auto; background: white;
+      padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .login-box input {
+      width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 16px; box-sizing: border-box;
+    }
+    .login-box button {
+      width: 100%; padding: 14px; background: #111; color: white;
+      border: none; border-radius: 8px; font-size: 16px; font-weight: 600; margin-top: 10px;
+    }
+    .dash-header {
+      background: #111; color: white; padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .dash-container { max-width: 800px; margin: 20px auto; padding: 0 16px; }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;
+    }
+    .stat-box {
+      background: white; padding: 20px; border-radius: 12px; text-align: center;
+    }
+    .stat-box .num { font-size: 28px; font-weight: bold; color: #e11d48; }
+    .stat-box .label { color: #666; margin-top: 4px; }
+    .dash-card {
+      background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+    }
     .product-card-admin {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 14px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 14px; margin-bottom: 14px; display: flex; gap: 12px;
     }
     .product-card-admin img {
-      width: 70px;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 8px;
-      flex-shrink: 0;
+      width: 70px; height: 70px; object-fit: cover; border-radius: 8px;
     }
     .product-card-admin input {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      font-size: 0.9rem;
-      box-sizing: border-box;
+      width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd;
+      border-radius: 6px; box-sizing: border-box;
     }
-    .admin-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 6px;
-    }
-    .btn-available {
-      background: #16a34a;
-      color: white;
-      border: none;
-      padding: 7px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    .btn-sold {
-      background: #dc2626;
-      color: white;
-      border: none;
-      padding: 7px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    .btn-save {
-      background: #111;
-      color: white;
-      border: none;
-      padding: 7px 14px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    .btn-delete {
-      background: #fff;
-      color: #dc2626;
-      border: 1px solid #dc2626;
-      padding: 7px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
+    .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-available { background: #16a34a; color: white; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; }
+    .btn-sold { background: #dc2626; color: white; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; }
+    .btn-save { background: #111; color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; }
+    .btn-delete { background: white; color: #dc2626; border: 1px solid #dc2626; padding: 7px 12px; border-radius: 6px; cursor: pointer; }
   </style>
 </head>
-<body class="dashboard-body">
+<body>
 
   <!-- LOGIN -->
   <div id="login-section">
     <div class="login-box">
-      <h2 style="margin-bottom:8px;">CEO Dashboard</h2>
-      <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Collins Clothing Admin</p>
-      <input type="password" id="password" placeholder="Enter password" style="width:100%;padding:12px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;">
-      <button onclick="doLogin()" style="width:100%;padding:14px;background:#111;color:white;border:none;border-radius:8px;font-weight:600;">Login</button>
-      <p style="margin-top:14px;font-size:13px;color:#888;">Password: collins2026</p>
+      <h2>CEO Login</h2>
+      <p style="color:#666;margin-bottom:20px;">Collins Clothing Admin</p>
+      <input type="email" id="email" placeholder="Admin email">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="doLogin()">Login</button>
+      <p id="login-error" style="color:#dc2626;margin-top:12px;display:none;"></p>
     </div>
   </div>
 
   <!-- DASHBOARD -->
   <div id="dash-section" style="display:none;">
-    <header class="dash-header">
-      <div><strong>Collins Clothing</strong> — CEO Panel</div>
-      <button onclick="doLogout()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:600;">Logout</button>
-    </header>
+    <div class="dash-header">
+      <div><strong>Collins Clothing</strong> — CEO</div>
+      <button onclick="doLogout()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;">Logout</button>
+    </div>
 
     <div class="dash-container">
-
-      <!-- STATS -->
       <div class="stats-grid">
         <div class="stat-box"><div class="num" id="stat-total">0</div><div class="label">Total</div></div>
         <div class="stat-box"><div class="num" id="stat-available">0</div><div class="label">Available</div></div>
@@ -111,14 +88,8 @@
         <h2>Add New Product</h2>
         <input type="file" id="new-image" accept="image/*" onchange="previewImage(event)">
         <img id="preview" style="display:none;width:100px;height:100px;object-fit:cover;border-radius:8px;margin:10px 0;">
-        <div class="form-group">
-          <label>Product Name</label>
-          <input type="text" id="new-name" placeholder="e.g. Steady Grinding Black Tee">
-        </div>
-        <div class="form-group">
-          <label>Price (₦)</label>
-          <input type="number" id="new-price" value="15000">
-        </div>
+        <input type="text" id="new-name" placeholder="Product name" style="width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
+        <input type="number" id="new-price" value="15000" style="width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;">
         <button onclick="addProduct()" class="btn-save" style="width:100%;padding:12px;margin-top:8px;">Add Product</button>
       </div>
 
@@ -126,42 +97,62 @@
       <div class="dash-card">
         <h2>Manage Products</h2>
         <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">
-          Edit name or price → Save. Toggle Available/Sold. Delete unwanted items.
+          Edit name/price → Save • Toggle Available/Sold • Delete
         </p>
         <div id="product-list"></div>
       </div>
-
     </div>
   </div>
 
+  <!-- Load config first, then Supabase library -->
+  <script src="supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
-    // ========== PASTE YOUR KEYS HERE ==========
-    const SUPABASE_URL = "YOUR_SUPABASE_URL_HERE";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
-    // ==========================================
-
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     let newImageData = "";
 
-    // Login
-    function doLogin() {
-      const pass = document.getElementById("password").value;
-      if (pass === "collins2026") {
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("dash-section").style.display = "block";
-        loadProducts();
-      } else {
-        alert("Wrong password");
+    // Check if already logged in
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        showDashboard();
       }
     }
+    checkSession();
 
-    function doLogout() {
+    function showDashboard() {
+      document.getElementById("login-section").style.display = "none";
+      document.getElementById("dash-section").style.display = "block";
+      loadProducts();
+    }
+
+    async function doLogin() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const errorEl = document.getElementById("login-error");
+      errorEl.style.display = "none";
+
+      if (!email || !password) {
+        errorEl.textContent = "Enter email and password";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = "block";
+        return;
+      }
+      showDashboard();
+    }
+
+    async function doLogout() {
+      await supabase.auth.signOut();
       location.reload();
     }
 
-    // Load products from Supabase
     async function loadProducts() {
       const { data, error } = await supabase.from("products").select("*").order("id");
       if (error) {
@@ -175,11 +166,16 @@
       document.getElementById("stat-sold").textContent = products.filter(p => !p.available).length;
 
       const list = document.getElementById("product-list");
+      if (!products.length) {
+        list.innerHTML = "<p style='color:#666;'>No products yet.</p>";
+        return;
+      }
+
       list.innerHTML = products.map(p => `
         <div class="product-card-admin" data-id="${p.id}">
-          <img src="${p.image || 'logo.png'}" alt="">
+          <img src="${p.image || 'logo.png'}" onerror="this.src='logo.png'">
           <div style="flex:1;">
-            <input class="edit-name" value="${p.name || ''}" placeholder="Product name">
+            <input class="edit-name" value="${(p.name || '').replace(/"/g, '&quot;')}">
             <input class="edit-price" type="number" value="${p.price || 0}">
             <div class="admin-actions">
               <button class="\( {p.available ? 'btn-available' : 'btn-sold'}" onclick="toggleStatus( \){p.id}, ${!p.available})">
@@ -193,21 +189,12 @@
       `).join("");
     }
 
-    // Toggle Available / Sold Out
     async function toggleStatus(id, newStatus) {
-      const { error } = await supabase
-        .from("products")
-        .update({ available: newStatus })
-        .eq("id", id);
-
-      if (error) {
-        alert("Error: " + error.message);
-        return;
-      }
-      loadProducts();
+      const { error } = await supabase.from("products").update({ available: newStatus }).eq("id", id);
+      if (error) alert(error.message);
+      else loadProducts();
     }
 
-    // Save name & price
     async function saveProduct(id) {
       const card = document.querySelector(`.product-card-admin[data-id="${id}"]`);
       const name = card.querySelector(".edit-name").value.trim();
@@ -218,36 +205,21 @@
         return;
       }
 
-      const { error } = await supabase
-        .from("products")
-        .update({ name, price })
-        .eq("id", id);
-
-      if (error) {
-        alert("Error: " + error.message);
-        return;
+      const { error } = await supabase.from("products").update({ name, price }).eq("id", id);
+      if (error) alert(error.message);
+      else {
+        alert("Saved!");
+        loadProducts();
       }
-      alert("Saved!");
-      loadProducts();
     }
 
-    // Delete product
     async function deleteProduct(id) {
-      if (!confirm("Delete this product permanently?")) return;
-
-      const { error } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", id);
-
-      if (error) {
-        alert("Error: " + error.message);
-        return;
-      }
-      loadProducts();
+      if (!confirm("Delete this product?")) return;
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (error) alert(error.message);
+      else loadProducts();
     }
 
-    // Preview image
     function previewImage(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -261,7 +233,6 @@
       reader.readAsDataURL(file);
     }
 
-    // Add new product
     async function addProduct() {
       const name = document.getElementById("new-name").value.trim();
       const price = parseInt(document.getElementById("new-price").value, 10);
@@ -271,20 +242,20 @@
         return;
       }
       if (!newImageData) {
-        alert("Please choose a photo");
+        alert("Choose a photo");
         return;
       }
 
       const { error } = await supabase.from("products").insert({
-        name: name,
+        name,
         brand: "COLLINS CLOTHING",
-        price: price,
+        price,
         image: newImageData,
         available: true
       });
 
       if (error) {
-        alert("Error: " + error.message);
+        alert(error.message);
         return;
       }
 
@@ -297,10 +268,9 @@
       alert("Product added!");
     }
 
-    // Allow Enter key on login
     document.getElementById("password").addEventListener("keypress", function(e) {
       if (e.key === "Enter") doLogin();
     });
   </script>
 </body>
-  </html>
+</html>
