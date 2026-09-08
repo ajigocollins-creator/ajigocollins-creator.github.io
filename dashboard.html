@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>CEO Dashboard - Collins Clothing</title>
 
   <link rel="stylesheet" href="styles.css">
@@ -19,15 +20,16 @@
     }
 
     .card-item img {
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       object-fit: cover;
       border-radius: 8px;
+      flex-shrink: 0;
     }
 
     .card-item input {
       width: 100%;
-      padding: 8px;
+      padding: 9px;
       margin-bottom: 8px;
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -38,6 +40,36 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    .status-toggle,
+    .save-btn,
+    .delete-btn {
+      border: none;
+      padding: 9px 13px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .status-toggle.available {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-toggle.sold {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .save-btn {
+      background: #111;
+      color: white;
+    }
+
+    .delete-btn {
+      background: #ef4444;
+      color: white;
     }
 
     .login-error {
@@ -56,12 +88,41 @@
       color: #666;
       padding: 15px 0;
     }
+
+    .product-message {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .preview-image {
+      display: none;
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+
+    .order-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .danger-text {
+      color: #dc2626;
+    }
   </style>
 </head>
 
 <body class="dashboard-body">
 
-  <!-- LOGIN -->
+  <!-- =========================================
+       LOGIN
+  ========================================== -->
+
   <div id="login-box" class="login-box" style="margin:80px auto;">
 
     <h2>CEO Dashboard</h2>
@@ -93,7 +154,10 @@
   </div>
 
 
-  <!-- DASHBOARD -->
+  <!-- =========================================
+       DASHBOARD
+  ========================================== -->
+
   <div id="app" style="display:none;">
 
     <header class="dash-header">
@@ -104,7 +168,13 @@
 
       <button
         onclick="logout()"
-        style="background:#ef4444;color:#fff;border:none;padding:8px 14px;border-radius:6px;"
+        style="
+          background:#ef4444;
+          color:#fff;
+          border:none;
+          padding:8px 14px;
+          border-radius:6px;
+        "
       >
         Logout
       </button>
@@ -114,7 +184,11 @@
 
     <div class="dash-container">
 
-      <!-- STATISTICS -->
+
+      <!-- =====================================
+           STATISTICS
+      ====================================== -->
+
       <div class="stats-grid">
 
         <div class="stat-box">
@@ -140,10 +214,13 @@
       </div>
 
 
-      <!-- ADD PRODUCT -->
+      <!-- =====================================
+           ADD PRODUCT
+      ====================================== -->
+
       <div class="dash-card">
 
-        <h2>Add New Product</h2>
+        <h2>➕ Add New Product</h2>
 
         <input
           type="file"
@@ -153,17 +230,18 @@
 
         <img
           id="prev"
-          style="display:none;width:90px;height:90px;object-fit:cover;border-radius:8px;margin:10px 0;"
+          class="preview-image"
+          alt="Image preview"
         >
 
         <div class="form-group">
 
-          <label>Name</label>
+          <label>Product Name</label>
 
           <input
             id="nname"
             type="text"
-            placeholder="Product name"
+            placeholder="Example: Steady Grinding Black Tee"
           >
 
         </div>
@@ -177,6 +255,7 @@
             id="nprice"
             type="number"
             value="15000"
+            min="1"
           >
 
         </div>
@@ -185,20 +264,29 @@
         <button
           class="save-btn"
           onclick="addProduct()"
-          style="width:100%;padding:12px;"
+          style="
+            width:100%;
+            padding:12px;
+          "
         >
           Add Product
         </button>
 
-        <p id="product-message"></p>
+        <p
+          id="product-message"
+          class="product-message"
+        ></p>
 
       </div>
 
 
-      <!-- ORDERS -->
+      <!-- =====================================
+           ORDERS
+      ====================================== -->
+
       <div class="dash-card">
 
-        <h2>Orders</h2>
+        <h2>📦 Orders</h2>
 
         <div id="orders">
           Loading orders...
@@ -207,17 +295,41 @@
       </div>
 
 
-      <!-- PRODUCTS -->
+      <!-- =====================================
+           MANAGE PRODUCTS
+      ====================================== -->
+
       <div class="dash-card">
 
-        <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:10px;
+          "
+        >
 
-          <h2>Manage Products</h2>
+          <h2>👕 Manage Products</h2>
+
+          <button
+            onclick="loadProducts()"
+            style="
+              padding:8px 12px;
+              border:1px solid #ddd;
+              background:#fff;
+              border-radius:6px;
+              cursor:pointer;
+            "
+          >
+            🔄 Refresh
+          </button>
 
         </div>
 
         <p style="color:#666;font-size:.9rem;">
-          Edit name/price → Save. Tap status to switch Available / Sold Out.
+          Edit the name or price, then tap Save.
+          Tap Available/Sold Out to change stock status.
         </p>
 
         <div id="plist">
@@ -231,69 +343,98 @@
   </div>
 
 
-  <!-- SUPABASE -->
+  <!-- =========================================
+       SUPABASE
+  ========================================== -->
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- YOUR SUPABASE CONFIG -->
   <script src="supabase-config.js"></script>
 
 
   <script>
 
-    // ============================================
-    // SUPABASE CLIENT
-    // ============================================
+    /* =========================================
+       SUPABASE CLIENT
+    ========================================== */
 
-    const supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
 
 
-    // ============================================
-    // LOGIN
-    // ============================================
+    /* =========================================
+       LOGIN
+    ========================================== */
 
-    document.getElementById('loginBtn').onclick = login;
+    document.getElementById("loginBtn").onclick =
+      login;
 
-    document.getElementById('pass').addEventListener('keypress', function(e) {
 
-      if (e.key === 'Enter') {
-        login();
+    document.getElementById("pass").addEventListener(
+      "keypress",
+      function(event) {
+
+        if (event.key === "Enter") {
+          login();
+        }
+
       }
-
-    });
+    );
 
 
     async function login() {
 
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('pass').value;
+      const email =
+        document.getElementById("email")
+          .value
+          .trim();
 
-      const message = document.getElementById('login-message');
+      const password =
+        document.getElementById("pass").value;
+
+      const message =
+        document.getElementById("login-message");
+
 
       if (!email || !password) {
 
-        message.className = 'login-error';
-        message.textContent = 'Enter your email and password.';
+        message.className = "login-error";
+
+        message.textContent =
+          "Enter your email and password.";
+
         return;
 
       }
 
-      message.className = '';
-      message.textContent = 'Logging in...';
+
+      message.className = "";
+
+      message.textContent =
+        "Logging in...";
+
 
       const { data, error } =
         await supabaseClient.auth.signInWithPassword({
+
           email: email,
+
           password: password
+
         });
 
 
       if (error) {
 
-        message.className = 'login-error';
-        message.textContent = error.message;
+        message.className =
+          "login-error";
+
+        message.textContent =
+          error.message;
+
         return;
 
       }
@@ -301,11 +442,15 @@
 
       if (data.user) {
 
-        document.getElementById('login-box').style.display = 'none';
+        document.getElementById(
+          "login-box"
+        ).style.display = "none";
 
-        document.getElementById('app').style.display = 'block';
 
-        message.textContent = '';
+        document.getElementById(
+          "app"
+        ).style.display = "block";
+
 
         loadDashboard();
 
@@ -314,9 +459,9 @@
     }
 
 
-    // ============================================
-    // LOGOUT
-    // ============================================
+    /* =========================================
+       LOGOUT
+    ========================================== */
 
     async function logout() {
 
@@ -327,9 +472,9 @@
     }
 
 
-    // ============================================
-    // LOAD DASHBOARD
-    // ============================================
+    /* =========================================
+       LOAD DASHBOARD
+    ========================================== */
 
     async function loadDashboard() {
 
@@ -340,26 +485,34 @@
     }
 
 
-    // ============================================
-    // LOAD PRODUCTS
-    // ============================================
+    /* =========================================
+       LOAD PRODUCTS
+    ========================================== */
 
     async function loadProducts() {
 
-      const { data, error } = await supabaseClient
-        .from('products')
-        .select('*')
-        .order('created_at', {
-          ascending: false
-        });
+      const container =
+        document.getElementById("plist");
+
+
+      container.innerHTML =
+        "<p>Loading products...</p>";
+
+
+      const { data, error } =
+        await supabaseClient
+          .from("products")
+          .select("*");
 
 
       if (error) {
 
-        document.getElementById('plist').innerHTML =
-          '<p class="login-error">Unable to load products: ' +
-          escapeHTML(error.message) +
-          '</p>';
+        container.innerHTML = `
+          <p class="login-error">
+            Unable to load products:<br>
+            ${escapeHTML(error.message)}
+          </p>
+        `;
 
         return;
 
@@ -369,16 +522,28 @@
       const products = data || [];
 
 
-      // Statistics
+      /* Statistics */
 
-      document.getElementById('t').textContent =
-        products.length;
+      document.getElementById("t")
+        .textContent = products.length;
 
-      document.getElementById('a').textContent =
-        products.filter(p => p.available === true).length;
 
-      document.getElementById('s').textContent =
-        products.filter(p => p.available === false).length;
+      document.getElementById("a")
+        .textContent =
+          products.filter(function(product) {
+
+            return product.available === true;
+
+          }).length;
+
+
+      document.getElementById("s")
+        .textContent =
+          products.filter(function(product) {
+
+            return product.available === false;
+
+          }).length;
 
 
       renderProducts(products);
@@ -386,75 +551,105 @@
     }
 
 
-    // ============================================
-    // DISPLAY PRODUCTS
-    // ============================================
+    /* =========================================
+       RENDER PRODUCTS
+    ========================================== */
 
     function renderProducts(products) {
 
       const container =
-        document.getElementById('plist');
+        document.getElementById("plist");
 
 
       if (!products.length) {
 
-        container.innerHTML =
-          '<p class="empty">No products yet. Add your first product above.</p>';
+        container.innerHTML = `
+          <p class="empty">
+            No products yet.
+          </p>
+        `;
 
         return;
 
       }
 
 
-      let html = '';
+      let html = "";
 
 
-      products.forEach(function(p) {
+      products.forEach(function(product) {
+
+        const id =
+          product.id;
+
 
         const image =
-          p.image_url || '';
+          product.image_url || "logo.png";
 
 
         html += `
 
-          <div class="card-item" data-id="${p.id}">
+          <div
+            class="card-item"
+            data-id="${escapeHTML(id)}"
+          >
 
-            ${
-              image
-              ? `<img src="${escapeHTML(image)}" alt="Product">`
-              : `<div style="width:70px;height:70px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-                   No image
-                 </div>`
-            }
+            <img
+              src="${escapeHTML(image)}"
+              alt="${escapeHTML(product.name || "Product")}"
+              onerror="this.src='logo.png'"
+            >
 
-            <div style="flex:1">
+
+            <div style="flex:1;">
 
               <input
                 class="en"
-                value="${escapeHTML(p.name || '')}"
+                type="text"
+                value="${escapeHTML(product.name || "")}"
                 placeholder="Product name"
               >
+
 
               <input
                 class="ep"
                 type="number"
-                value="${p.price || 0}"
+                value="${Number(product.price) || 0}"
+                min="1"
               >
+
 
               <div class="row-actions">
 
                 <button
-                  class="status-toggle ${p.available ? 'available' : 'sold'}"
-                  onclick="toggleProduct(${p.id}, ${p.available})"
+                  class="status-toggle ${
+                    product.available
+                      ? "available"
+                      : "sold"
+                  }"
+                  onclick='toggleProduct(${JSON.stringify(id)}, ${product.available})'
                 >
-                  ${p.available ? 'Available' : 'Sold Out'}
+                  ${
+                    product.available
+                      ? "🟢 Available"
+                      : "🔴 Sold Out"
+                  }
                 </button>
+
 
                 <button
                   class="save-btn"
-                  onclick="saveProduct(${p.id})"
+                  onclick='saveProduct(${JSON.stringify(id)})'
                 >
-                  Save
+                  💾 Save
+                </button>
+
+
+                <button
+                  class="delete-btn"
+                  onclick='deleteProduct(${JSON.stringify(id)})'
+                >
+                  🗑️ Delete
                 </button>
 
               </div>
@@ -473,70 +668,88 @@
     }
 
 
-    // ============================================
-    // ADD PRODUCT
-    // ============================================
+    /* =========================================
+       ADD PRODUCT
+    ========================================== */
 
     async function addProduct() {
 
       const name =
-        document.getElementById('nname').value.trim();
+        document.getElementById("nname")
+          .value
+          .trim();
+
 
       const price =
-        Number(document.getElementById('nprice').value);
+        Number(
+          document.getElementById("nprice").value
+        );
+
 
       const file =
-        document.getElementById('img').files[0];
+        document.getElementById("img")
+          .files[0];
+
 
       const message =
-        document.getElementById('product-message');
+        document.getElementById(
+          "product-message"
+        );
 
 
       if (!name || !price || !file) {
 
-        message.className = 'login-error';
+        message.className =
+          "login-error";
 
         message.textContent =
-          'Add a product name, price and photo.';
+          "Add a product name, price and photo.";
 
         return;
 
       }
 
 
-      message.className = '';
+      message.className = "";
 
       message.textContent =
-        'Uploading product...';
+        "Uploading product...";
 
 
       try {
 
-        // Create unique filename
-
         const fileName =
-          Date.now() + '-' +
-          file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
+          Date.now() +
+          "-" +
+          file.name.replace(
+            /[^a-zA-Z0-9.-]/g,
+            "-"
+          );
 
 
-        // Upload image
+        /* Upload image */
 
         const { error: uploadError } =
           await supabaseClient.storage
-            .from('product-images')
-            .upload(fileName, file);
+            .from("product-images")
+            .upload(
+              fileName,
+              file
+            );
 
 
         if (uploadError) {
+
           throw uploadError;
+
         }
 
 
-        // Get public image URL
+        /* Public image URL */
 
         const { data: publicData } =
           supabaseClient.storage
-            .from('product-images')
+            .from("product-images")
             .getPublicUrl(fileName);
 
 
@@ -544,11 +757,11 @@
           publicData.publicUrl;
 
 
-        // Save product
+        /* Insert product */
 
-        const { error: productError } =
+        const { error: insertError } =
           await supabaseClient
-            .from('products')
+            .from("products")
             .insert({
 
               name: name,
@@ -562,34 +775,44 @@
             });
 
 
-        if (productError) {
-
-          // If database insert fails, remove uploaded image
+        if (insertError) {
 
           await supabaseClient.storage
-            .from('product-images')
+            .from("product-images")
             .remove([fileName]);
 
-          throw productError;
+          throw insertError;
 
         }
 
 
-        // Clear form
+        /* Clear form */
 
-        document.getElementById('nname').value = '';
-
-        document.getElementById('nprice').value = '15000';
-
-        document.getElementById('img').value = '';
-
-        document.getElementById('prev').style.display = 'none';
+        document.getElementById(
+          "nname"
+        ).value = "";
 
 
-        message.className = 'success';
+        document.getElementById(
+          "nprice"
+        ).value = "15000";
+
+
+        document.getElementById(
+          "img"
+        ).value = "";
+
+
+        document.getElementById(
+          "prev"
+        ).style.display = "none";
+
+
+        message.className =
+          "success";
 
         message.textContent =
-          'Product added successfully! ✅';
+          "Product added successfully! ✅";
 
 
         await loadProducts();
@@ -598,24 +821,27 @@
 
       catch (error) {
 
-        message.className = 'login-error';
+        message.className =
+          "login-error";
 
         message.textContent =
-          'Error: ' + error.message;
+          "Error: " + error.message;
 
       }
 
     }
 
 
-    // ============================================
-    // IMAGE PREVIEW
-    // ============================================
+    /* =========================================
+       IMAGE PREVIEW
+    ========================================== */
 
-    document.getElementById('img').onchange =
-      function(e) {
+    document.getElementById("img").onchange =
+      function(event) {
 
-        const file = e.target.files[0];
+        const file =
+          event.target.files[0];
+
 
         if (!file) return;
 
@@ -625,16 +851,18 @@
 
 
         reader.onload =
-          function(event) {
+          function(e) {
 
             const preview =
-              document.getElementById('prev');
+              document.getElementById("prev");
+
 
             preview.src =
-              event.target.result;
+              e.target.result;
+
 
             preview.style.display =
-              'block';
+              "block";
 
           };
 
@@ -644,24 +872,33 @@
       };
 
 
-    // ============================================
-    // CHANGE AVAILABLE / SOLD OUT
-    // ============================================
+    /* =========================================
+       TOGGLE AVAILABLE / SOLD OUT
+    ========================================== */
 
-    async function toggleProduct(id, currentStatus) {
+    async function toggleProduct(
+      id,
+      currentStatus
+    ) {
 
       const { error } =
         await supabaseClient
-          .from('products')
+          .from("products")
           .update({
-            available: !currentStatus
+
+            available:
+              !currentStatus
+
           })
-          .eq('id', id);
+          .eq("id", id);
 
 
       if (error) {
 
-        alert('Unable to update status: ' + error.message);
+        alert(
+          "Unable to update status:\n" +
+          error.message
+        );
 
         return;
 
@@ -673,31 +910,46 @@
     }
 
 
-    // ============================================
-    // SAVE PRODUCT
-    // ============================================
+    /* =========================================
+       SAVE NAME + PRICE
+    ========================================== */
 
     async function saveProduct(id) {
 
       const card =
         document.querySelector(
-          '.card-item[data-id="' + id + '"]'
+          '.card-item[data-id="' +
+          CSS.escape(String(id)) +
+          '"]'
         );
 
 
-      if (!card) return;
+      if (!card) {
+
+        alert("Product not found.");
+
+        return;
+
+      }
 
 
       const name =
-        card.querySelector('.en').value.trim();
+        card.querySelector(".en")
+          .value
+          .trim();
+
 
       const price =
-        Number(card.querySelector('.ep').value);
+        Number(
+          card.querySelector(".ep").value
+        );
 
 
       if (!name || !price) {
 
-        alert('Enter a valid name and price.');
+        alert(
+          "Enter a valid product name and price."
+        );
 
         return;
 
@@ -706,7 +958,7 @@
 
       const { error } =
         await supabaseClient
-          .from('products')
+          .from("products")
           .update({
 
             name: name,
@@ -714,50 +966,109 @@
             price: price
 
           })
-          .eq('id', id);
+          .eq("id", id);
 
 
       if (error) {
 
-        alert('Unable to save product: ' + error.message);
+        alert(
+          "Unable to save product:\n" +
+          error.message
+        );
 
         return;
 
       }
 
 
-      alert('Product saved successfully! ✅');
+      alert(
+        "Product saved successfully! ✅"
+      );
+
 
       await loadProducts();
 
     }
 
 
-    // ============================================
-    // LOAD ORDERS
-    // ============================================
+    /* =========================================
+       DELETE PRODUCT
+    ========================================== */
 
-    async function loadOrders() {
+    async function deleteProduct(id) {
 
-      const container =
-        document.getElementById('orders');
+      const confirmed =
+        confirm(
+          "Are you sure you want to delete this product?\n\n" +
+          "This will remove it from the shop."
+        );
 
 
-      const { data, error } =
+      if (!confirmed) return;
+
+
+      const { error } =
         await supabaseClient
-          .from('orders')
-          .select('*')
-          .order('created_at', {
-            ascending: false
-          });
+          .from("products")
+          .delete()
+          .eq("id", id);
 
 
       if (error) {
 
-        container.innerHTML =
-          '<p class="login-error">Unable to load orders: ' +
-          escapeHTML(error.message) +
-          '</p>';
+        alert(
+          "Unable to delete product:\n" +
+          error.message
+        );
+
+        return;
+
+      }
+
+
+      alert(
+        "Product deleted successfully! 🗑️"
+      );
+
+
+      await loadProducts();
+
+    }
+
+
+    /* =========================================
+       LOAD ORDERS
+    ========================================== */
+
+    async function loadOrders() {
+
+      const container =
+        document.getElementById("orders");
+
+
+      const { data, error } =
+        await supabaseClient
+          .from("orders")
+          .select("*")
+          .order(
+            "created_at",
+            {
+              ascending: false
+            }
+          );
+
+
+      if (error) {
+
+        container.innerHTML = `
+          <p class="login-error">
+            Unable to load orders:<br>
+            ${escapeHTML(error.message)}
+          </p>
+        `;
+
+        document.getElementById("o")
+          .textContent = "0";
 
         return;
 
@@ -767,21 +1078,24 @@
       const orders = data || [];
 
 
-      document.getElementById('o').textContent =
-        orders.length;
+      document.getElementById("o")
+        .textContent = orders.length;
 
 
       if (!orders.length) {
 
-        container.innerHTML =
-          '<p class="empty">No orders yet.</p>';
+        container.innerHTML = `
+          <p class="empty">
+            No orders yet.
+          </p>
+        `;
 
         return;
 
       }
 
 
-      let html = '';
+      let html = "";
 
 
       orders.forEach(function(order) {
@@ -790,49 +1104,45 @@
 
           <div class="order-card">
 
+            <strong>
+              Order #${escapeHTML(order.id)}
+            </strong>
+
+            <div style="margin-top:7px;">
+              Customer:
+              ${escapeHTML(
+                order.customer_name || "Customer"
+              )}
+            </div>
+
             <div>
-              <strong>Order #${order.id}</strong>
+              Phone:
+              ${escapeHTML(
+                order.phone || "Not provided"
+              )}
             </div>
 
-            <div style="margin-top:6px;">
-
-              ${
-                order.customer_name
-                ? escapeHTML(order.customer_name)
-                : 'Customer'
-              }
-
+            <div>
+              Address:
+              ${escapeHTML(
+                order.address || "Pickup"
+              )}
             </div>
 
-            ${
-              order.phone
-              ? `<div>${escapeHTML(order.phone)}</div>`
-              : ''
-            }
+            <div style="margin-top:7px;">
+              <strong>
+                ₦${Number(
+                  order.total || 0
+                ).toLocaleString()}
+              </strong>
+            </div>
 
-            ${
-              order.address
-              ? `<div style="font-size:.9rem;color:#555;">
-                   ${escapeHTML(order.address)}
-                 </div>`
-              : ''
-            }
-
-            ${
-              order.total !== undefined
-              ? `<div style="margin-top:6px;">
-                   <strong>₦${Number(order.total).toLocaleString()}</strong>
-                 </div>`
-              : ''
-            }
-
-            ${
-              order.status
-              ? `<div style="margin-top:5px;">
-                   Status: ${escapeHTML(order.status)}
-                 </div>`
-              : ''
-            }
+            <div style="margin-top:5px;">
+              Status:
+              ${escapeHTML(
+                order.status || "Pending"
+              )}
+            </div>
 
           </div>
 
@@ -846,39 +1156,64 @@
     }
 
 
-    // ============================================
-    // SECURITY HELPER
-    // ============================================
+    /* =========================================
+       SECURITY HELPER
+    ========================================== */
 
     function escapeHTML(value) {
 
       return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+
+        .replace(
+          /</g,
+          "&lt;"
+        )
+
+        .replace(
+          />/g,
+          "&gt;"
+        )
+
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+
+        .replace(
+          /'/g,
+          "&#039;"
+        );
 
     }
 
 
-    // ============================================
-    // CHECK EXISTING SESSION
-    // ============================================
+    /* =========================================
+       CHECK EXISTING SESSION
+    ========================================== */
 
     async function checkExistingSession() {
 
       const { data } =
-        await supabaseClient.auth.getSession();
+        await supabaseClient.auth
+          .getSession();
 
 
       if (data.session) {
 
-        document.getElementById('login-box').style.display =
-          'none';
+        document.getElementById(
+          "login-box"
+        ).style.display = "none";
 
-        document.getElementById('app').style.display =
-          'block';
+
+        document.getElementById(
+          "app"
+        ).style.display = "block";
+
 
         loadDashboard();
 
@@ -892,4 +1227,4 @@
   </script>
 
 </body>
-  </html>
+</html>
