@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CEO Dashboard</title>
+  <title>CEO Dashboard - Collins Clothing</title>
+
   <link rel="stylesheet" href="styles.css">
+
   <style>
     .card-item {
       background: #f8fafc;
@@ -15,12 +17,14 @@
       display: flex;
       gap: 12px;
     }
+
     .card-item img {
       width: 70px;
       height: 70px;
       object-fit: cover;
       border-radius: 8px;
     }
+
     .card-item input {
       width: 100%;
       padding: 8px;
@@ -29,174 +33,863 @@
       border-radius: 6px;
       box-sizing: border-box;
     }
-    .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .login-error {
+      color: #dc2626;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .success {
+      color: #16a34a;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .empty {
+      color: #666;
+      padding: 15px 0;
+    }
   </style>
 </head>
+
 <body class="dashboard-body">
 
+  <!-- LOGIN -->
   <div id="login-box" class="login-box" style="margin:80px auto;">
+
     <h2>CEO Dashboard</h2>
-    <p style="color:#666;margin-bottom:16px;">Collins Clothing</p>
-    <input id="pass" type="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
-    <p style="margin-top:14px;font-size:13px;color:#888;">Password: collins2026</p>
+
+    <p style="color:#666;margin-bottom:16px;">
+      Collins Clothing
+    </p>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Admin email"
+      autocomplete="email"
+    >
+
+    <input
+      id="pass"
+      type="password"
+      placeholder="Password"
+      autocomplete="current-password"
+    >
+
+    <button id="loginBtn">
+      Login
+    </button>
+
+    <p id="login-message"></p>
+
   </div>
 
+
+  <!-- DASHBOARD -->
   <div id="app" style="display:none;">
+
     <header class="dash-header">
-      <div><strong>Collins Clothing</strong> — CEO</div>
-      <button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 14px;border-radius:6px;">Logout</button>
+
+      <div>
+        <strong>Collins Clothing</strong> — CEO
+      </div>
+
+      <button
+        onclick="logout()"
+        style="background:#ef4444;color:#fff;border:none;padding:8px 14px;border-radius:6px;"
+      >
+        Logout
+      </button>
+
     </header>
 
+
     <div class="dash-container">
+
+      <!-- STATISTICS -->
       <div class="stats-grid">
-        <div class="stat-box"><div class="num" id="t">0</div><div class="label">Total</div></div>
-        <div class="stat-box"><div class="num" id="a">0</div><div class="label">Available</div></div>
-        <div class="stat-box"><div class="num" id="s">0</div><div class="label">Sold Out</div></div>
-        <div class="stat-box"><div class="num" id="o">0</div><div class="label">Orders</div></div>
-      </div>
 
-      <div class="dash-card">
-        <h2>Add New Product</h2>
-        <input type="file" id="img" accept="image/*">
-        <img id="prev" style="display:none;width:90px;height:90px;object-fit:cover;border-radius:8px;margin:10px 0;">
-        <div class="form-group"><label>Name</label><input id="nname" type="text"></div>
-        <div class="form-group"><label>Price (₦)</label><input id="nprice" type="number" value="15000"></div>
-        <button class="save-btn" onclick="addP()" style="width:100%;padding:12px;">Add Product</button>
-      </div>
-
-      <div class="dash-card">
-        <h2>Orders</h2>
-        <div id="orders">No orders yet.</div>
-      </div>
-
-      <div class="dash-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h2>Manage Products</h2>
-          <button onclick="resetP()" style="padding:8px 12px;border:1px solid #ddd;background:#fff;border-radius:6px;">Reset</button>
+        <div class="stat-box">
+          <div class="num" id="t">0</div>
+          <div class="label">Total</div>
         </div>
-        <p style="color:#666;font-size:.9rem;">Edit name/price → Save. Tap status to switch Available / Sold Out.</p>
-        <div id="plist"></div>
+
+        <div class="stat-box">
+          <div class="num" id="a">0</div>
+          <div class="label">Available</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="num" id="s">0</div>
+          <div class="label">Sold Out</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="num" id="o">0</div>
+          <div class="label">Orders</div>
+        </div>
+
       </div>
+
+
+      <!-- ADD PRODUCT -->
+      <div class="dash-card">
+
+        <h2>Add New Product</h2>
+
+        <input
+          type="file"
+          id="img"
+          accept="image/*"
+        >
+
+        <img
+          id="prev"
+          style="display:none;width:90px;height:90px;object-fit:cover;border-radius:8px;margin:10px 0;"
+        >
+
+        <div class="form-group">
+
+          <label>Name</label>
+
+          <input
+            id="nname"
+            type="text"
+            placeholder="Product name"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Price (₦)</label>
+
+          <input
+            id="nprice"
+            type="number"
+            value="15000"
+          >
+
+        </div>
+
+
+        <button
+          class="save-btn"
+          onclick="addProduct()"
+          style="width:100%;padding:12px;"
+        >
+          Add Product
+        </button>
+
+        <p id="product-message"></p>
+
+      </div>
+
+
+      <!-- ORDERS -->
+      <div class="dash-card">
+
+        <h2>Orders</h2>
+
+        <div id="orders">
+          Loading orders...
+        </div>
+
+      </div>
+
+
+      <!-- PRODUCTS -->
+      <div class="dash-card">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+
+          <h2>Manage Products</h2>
+
+        </div>
+
+        <p style="color:#666;font-size:.9rem;">
+          Edit name/price → Save. Tap status to switch Available / Sold Out.
+        </p>
+
+        <div id="plist">
+          Loading products...
+        </div>
+
+      </div>
+
     </div>
+
   </div>
 
-  <script src="products.js"></script>
+
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- YOUR SUPABASE CONFIG -->
+  <script src="supabase-config.js"></script>
+
+
   <script>
-    var imgData = '';
 
-    document.getElementById('loginBtn').onclick = function () {
-      if (document.getElementById('pass').value === 'collins2026') {
+    // ============================================
+    // SUPABASE CLIENT
+    // ============================================
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+
+    // ============================================
+    // LOGIN
+    // ============================================
+
+    document.getElementById('loginBtn').onclick = login;
+
+    document.getElementById('pass').addEventListener('keypress', function(e) {
+
+      if (e.key === 'Enter') {
+        login();
+      }
+
+    });
+
+
+    async function login() {
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('pass').value;
+
+      const message = document.getElementById('login-message');
+
+      if (!email || !password) {
+
+        message.className = 'login-error';
+        message.textContent = 'Enter your email and password.';
+        return;
+
+      }
+
+      message.className = '';
+      message.textContent = 'Logging in...';
+
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+
+      if (error) {
+
+        message.className = 'login-error';
+        message.textContent = error.message;
+        return;
+
+      }
+
+
+      if (data.user) {
+
         document.getElementById('login-box').style.display = 'none';
+
         document.getElementById('app').style.display = 'block';
-        draw();
-      } else {
-        alert('Wrong password. Use collins2026');
+
+        message.textContent = '';
+
+        loadDashboard();
+
       }
-    };
 
-    document.getElementById('pass').onkeypress = function (e) {
-      if (e.key === 'Enter') document.getElementById('loginBtn').click();
-    };
+    }
 
-    function logout() { location.reload(); }
 
-    function draw() {
-      var products = getProducts();
-      document.getElementById('t').textContent = products.length;
-      document.getElementById('a').textContent = products.filter(function (p) { return p.available; }).length;
-      document.getElementById('s').textContent = products.filter(function (p) { return !p.available; }).length;
-      document.getElementById('o').textContent = getOrders().length;
+    // ============================================
+    // LOGOUT
+    // ============================================
 
-      var html = '';
-      for (var i = 0; i < products.length; i++) {
-        var p = products[i];
-        html += '<div class="card-item" data-id="' + p.id + '">' +
-          '<img src="' + p.image + '">' +
-          '<div style="flex:1">' +
-            '<input class="en" value="' + p.name.replace(/"/g, '&quot;') + '">' +
-            '<input class="ep" type="number" value="' + p.price + '">' +
-            '<div class="row-actions">' +
-              '<button class="status-toggle ' + (p.available ? 'available' : 'sold') + '" onclick="tog(' + p.id + ')">' + (p.available ? 'Available' : 'Sold Out') + '</button>' +
-              '<button class="save-btn" onclick="sav(' + p.id + ')">Save</button>' +
-            '</div>' +
-          '</div></div>';
+    async function logout() {
+
+      await supabaseClient.auth.signOut();
+
+      location.reload();
+
+    }
+
+
+    // ============================================
+    // LOAD DASHBOARD
+    // ============================================
+
+    async function loadDashboard() {
+
+      await loadProducts();
+
+      await loadOrders();
+
+    }
+
+
+    // ============================================
+    // LOAD PRODUCTS
+    // ============================================
+
+    async function loadProducts() {
+
+      const { data, error } = await supabaseClient
+        .from('products')
+        .select('*')
+        .order('created_at', {
+          ascending: false
+        });
+
+
+      if (error) {
+
+        document.getElementById('plist').innerHTML =
+          '<p class="login-error">Unable to load products: ' +
+          escapeHTML(error.message) +
+          '</p>';
+
+        return;
+
       }
-      document.getElementById('plist').innerHTML = html;
 
-      var orders = getOrders();
-      if (!orders.length) {
-        document.getElementById('orders').innerHTML = 'No orders yet.';
-      } else {
-        var oh = '';
-        for (var j = 0; j < orders.length; j++) {
-          var x = orders[j];
-          oh += '<div class="order-card"><strong>' + x.customer.name + '</strong> • ' + x.customer.phone + '<br>' + formatPrice(x.total) + '</div>';
+
+      const products = data || [];
+
+
+      // Statistics
+
+      document.getElementById('t').textContent =
+        products.length;
+
+      document.getElementById('a').textContent =
+        products.filter(p => p.available === true).length;
+
+      document.getElementById('s').textContent =
+        products.filter(p => p.available === false).length;
+
+
+      renderProducts(products);
+
+    }
+
+
+    // ============================================
+    // DISPLAY PRODUCTS
+    // ============================================
+
+    function renderProducts(products) {
+
+      const container =
+        document.getElementById('plist');
+
+
+      if (!products.length) {
+
+        container.innerHTML =
+          '<p class="empty">No products yet. Add your first product above.</p>';
+
+        return;
+
+      }
+
+
+      let html = '';
+
+
+      products.forEach(function(p) {
+
+        const image =
+          p.image_url || '';
+
+
+        html += `
+
+          <div class="card-item" data-id="${p.id}">
+
+            ${
+              image
+              ? `<img src="${escapeHTML(image)}" alt="Product">`
+              : `<div style="width:70px;height:70px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                   No image
+                 </div>`
+            }
+
+            <div style="flex:1">
+
+              <input
+                class="en"
+                value="${escapeHTML(p.name || '')}"
+                placeholder="Product name"
+              >
+
+              <input
+                class="ep"
+                type="number"
+                value="${p.price || 0}"
+              >
+
+              <div class="row-actions">
+
+                <button
+                  class="status-toggle ${p.available ? 'available' : 'sold'}"
+                  onclick="toggleProduct(${p.id}, ${p.available})"
+                >
+                  ${p.available ? 'Available' : 'Sold Out'}
+                </button>
+
+                <button
+                  class="save-btn"
+                  onclick="saveProduct(${p.id})"
+                >
+                  Save
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        `;
+
+      });
+
+
+      container.innerHTML = html;
+
+    }
+
+
+    // ============================================
+    // ADD PRODUCT
+    // ============================================
+
+    async function addProduct() {
+
+      const name =
+        document.getElementById('nname').value.trim();
+
+      const price =
+        Number(document.getElementById('nprice').value);
+
+      const file =
+        document.getElementById('img').files[0];
+
+      const message =
+        document.getElementById('product-message');
+
+
+      if (!name || !price || !file) {
+
+        message.className = 'login-error';
+
+        message.textContent =
+          'Add a product name, price and photo.';
+
+        return;
+
+      }
+
+
+      message.className = '';
+
+      message.textContent =
+        'Uploading product...';
+
+
+      try {
+
+        // Create unique filename
+
+        const fileName =
+          Date.now() + '-' +
+          file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
+
+
+        // Upload image
+
+        const { error: uploadError } =
+          await supabaseClient.storage
+            .from('product-images')
+            .upload(fileName, file);
+
+
+        if (uploadError) {
+          throw uploadError;
         }
-        document.getElementById('orders').innerHTML = oh;
+
+
+        // Get public image URL
+
+        const { data: publicData } =
+          supabaseClient.storage
+            .from('product-images')
+            .getPublicUrl(fileName);
+
+
+        const imageURL =
+          publicData.publicUrl;
+
+
+        // Save product
+
+        const { error: productError } =
+          await supabaseClient
+            .from('products')
+            .insert({
+
+              name: name,
+
+              price: price,
+
+              image_url: imageURL,
+
+              available: true
+
+            });
+
+
+        if (productError) {
+
+          // If database insert fails, remove uploaded image
+
+          await supabaseClient.storage
+            .from('product-images')
+            .remove([fileName]);
+
+          throw productError;
+
+        }
+
+
+        // Clear form
+
+        document.getElementById('nname').value = '';
+
+        document.getElementById('nprice').value = '15000';
+
+        document.getElementById('img').value = '';
+
+        document.getElementById('prev').style.display = 'none';
+
+
+        message.className = 'success';
+
+        message.textContent =
+          'Product added successfully! ✅';
+
+
+        await loadProducts();
+
       }
+
+      catch (error) {
+
+        message.className = 'login-error';
+
+        message.textContent =
+          'Error: ' + error.message;
+
+      }
+
     }
 
-    function tog(id) {
-      var products = getProducts();
-      for (var i = 0; i < products.length; i++) {
-        if (products[i].id === id) products[i].available = !products[i].available;
-      }
-      saveProducts(products);
-      draw();
-    }
 
-    function sav(id) {
-      var card = document.querySelector('.card-item[data-id="' + id + '"]');
-      var name = card.querySelector('.en').value.trim();
-      var price = parseInt(card.querySelector('.ep').value, 10);
-      if (!name || isNaN(price)) { alert('Enter name and price'); return; }
-      var products = getProducts();
-      for (var i = 0; i < products.length; i++) {
-        if (products[i].id === id) { products[i].name = name; products[i].price = price; }
-      }
-      saveProducts(products);
-      draw();
-      alert('Saved');
-    }
+    // ============================================
+    // IMAGE PREVIEW
+    // ============================================
 
-    function resetP() {
-      if (confirm('Reset products?')) {
-        localStorage.removeItem('collins_products');
-        draw();
-      }
-    }
+    document.getElementById('img').onchange =
+      function(e) {
 
-    document.getElementById('img').onchange = function (e) {
-      var f = e.target.files[0];
-      if (!f) return;
-      var r = new FileReader();
-      r.onload = function (ev) {
-        imgData = ev.target.result;
-        var p = document.getElementById('prev');
-        p.src = imgData;
-        p.style.display = 'block';
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+
+        const reader =
+          new FileReader();
+
+
+        reader.onload =
+          function(event) {
+
+            const preview =
+              document.getElementById('prev');
+
+            preview.src =
+              event.target.result;
+
+            preview.style.display =
+              'block';
+
+          };
+
+
+        reader.readAsDataURL(file);
+
       };
-      r.readAsDataURL(f);
-    };
 
-    function addP() {
-      var name = document.getElementById('nname').value.trim();
-      var price = parseInt(document.getElementById('nprice').value, 10);
-      if (!name || !price || !imgData) { alert('Add name, price and photo'); return; }
-      var products = getProducts();
-      var id = 1;
-      for (var i = 0; i < products.length; i++) if (products[i].id >= id) id = products[i].id + 1;
-      products.push({ id: id, name: name, brand: 'COLLINS CLOTHING', price: price, image: imgData, available: true });
-      saveProducts(products);
-      document.getElementById('nname').value = '';
-      document.getElementById('nprice').value = '15000';
-      document.getElementById('img').value = '';
-      document.getElementById('prev').style.display = 'none';
-      imgData = '';
-      draw();
-      alert('Added');
+
+    // ============================================
+    // CHANGE AVAILABLE / SOLD OUT
+    // ============================================
+
+    async function toggleProduct(id, currentStatus) {
+
+      const { error } =
+        await supabaseClient
+          .from('products')
+          .update({
+            available: !currentStatus
+          })
+          .eq('id', id);
+
+
+      if (error) {
+
+        alert('Unable to update status: ' + error.message);
+
+        return;
+
+      }
+
+
+      await loadProducts();
+
     }
+
+
+    // ============================================
+    // SAVE PRODUCT
+    // ============================================
+
+    async function saveProduct(id) {
+
+      const card =
+        document.querySelector(
+          '.card-item[data-id="' + id + '"]'
+        );
+
+
+      if (!card) return;
+
+
+      const name =
+        card.querySelector('.en').value.trim();
+
+      const price =
+        Number(card.querySelector('.ep').value);
+
+
+      if (!name || !price) {
+
+        alert('Enter a valid name and price.');
+
+        return;
+
+      }
+
+
+      const { error } =
+        await supabaseClient
+          .from('products')
+          .update({
+
+            name: name,
+
+            price: price
+
+          })
+          .eq('id', id);
+
+
+      if (error) {
+
+        alert('Unable to save product: ' + error.message);
+
+        return;
+
+      }
+
+
+      alert('Product saved successfully! ✅');
+
+      await loadProducts();
+
+    }
+
+
+    // ============================================
+    // LOAD ORDERS
+    // ============================================
+
+    async function loadOrders() {
+
+      const container =
+        document.getElementById('orders');
+
+
+      const { data, error } =
+        await supabaseClient
+          .from('orders')
+          .select('*')
+          .order('created_at', {
+            ascending: false
+          });
+
+
+      if (error) {
+
+        container.innerHTML =
+          '<p class="login-error">Unable to load orders: ' +
+          escapeHTML(error.message) +
+          '</p>';
+
+        return;
+
+      }
+
+
+      const orders = data || [];
+
+
+      document.getElementById('o').textContent =
+        orders.length;
+
+
+      if (!orders.length) {
+
+        container.innerHTML =
+          '<p class="empty">No orders yet.</p>';
+
+        return;
+
+      }
+
+
+      let html = '';
+
+
+      orders.forEach(function(order) {
+
+        html += `
+
+          <div class="order-card">
+
+            <div>
+              <strong>Order #${order.id}</strong>
+            </div>
+
+            <div style="margin-top:6px;">
+
+              ${
+                order.customer_name
+                ? escapeHTML(order.customer_name)
+                : 'Customer'
+              }
+
+            </div>
+
+            ${
+              order.phone
+              ? `<div>${escapeHTML(order.phone)}</div>`
+              : ''
+            }
+
+            ${
+              order.address
+              ? `<div style="font-size:.9rem;color:#555;">
+                   ${escapeHTML(order.address)}
+                 </div>`
+              : ''
+            }
+
+            ${
+              order.total !== undefined
+              ? `<div style="margin-top:6px;">
+                   <strong>₦${Number(order.total).toLocaleString()}</strong>
+                 </div>`
+              : ''
+            }
+
+            ${
+              order.status
+              ? `<div style="margin-top:5px;">
+                   Status: ${escapeHTML(order.status)}
+                 </div>`
+              : ''
+            }
+
+          </div>
+
+        `;
+
+      });
+
+
+      container.innerHTML = html;
+
+    }
+
+
+    // ============================================
+    // SECURITY HELPER
+    // ============================================
+
+    function escapeHTML(value) {
+
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    }
+
+
+    // ============================================
+    // CHECK EXISTING SESSION
+    // ============================================
+
+    async function checkExistingSession() {
+
+      const { data } =
+        await supabaseClient.auth.getSession();
+
+
+      if (data.session) {
+
+        document.getElementById('login-box').style.display =
+          'none';
+
+        document.getElementById('app').style.display =
+          'block';
+
+        loadDashboard();
+
+      }
+
+    }
+
+
+    checkExistingSession();
+
   </script>
+
 </body>
-</html>
+  </html>
