@@ -997,6 +997,60 @@
 
     async function deleteProduct(id) {
 
+  const confirmed = confirm(
+    "Are you sure you want to delete this product?\n\n" +
+    "This will permanently remove it from the shop."
+  );
+
+  if (!confirmed) return;
+
+  try {
+
+    const { data, error } = await supabaseClient
+      .from("products")
+      .delete()
+      .eq("id", id)
+      .select();
+
+    if (error) {
+      alert(
+        "Unable to delete product:\n\n" +
+        error.message
+      );
+      return;
+    }
+
+    // Check whether Supabase actually deleted a row
+    if (!data || data.length === 0) {
+
+      alert(
+        "The product was NOT deleted from Supabase.\n\n" +
+        "This usually means the database permissions (RLS) are blocking DELETE."
+      );
+
+      return;
+    }
+
+    alert(
+      "Product deleted successfully! 🗑️\n\n" +
+      "It has been removed from Supabase."
+    );
+
+    // Reload the dashboard from Supabase
+    await loadProducts();
+
+  } catch (error) {
+
+    console.error("Delete error:", error);
+
+    alert(
+      "Delete failed:\n\n" +
+      error.message
+    );
+
+  }
+    }
+
       const confirmed =
         confirm(
           "Are you sure you want to delete this product?\n\n" +
