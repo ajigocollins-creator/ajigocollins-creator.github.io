@@ -66,7 +66,7 @@ async function loadProductsFromSupabase() {
         id: product.id,
         name: product.name || "Unnamed Product",
         price: Number(product.price) || 0,
-        image: product.image_url || "logo.png",
+        image: product.image || "logo.png",   // ← FIXED HERE
         available: product.available !== false
       };
 
@@ -113,37 +113,25 @@ function renderProducts(filter = "all") {
   let products = shopProducts;
 
   if (filter === "available") {
-
     products = shopProducts.filter(function(product) {
       return product.available === true;
     });
-
   }
 
   if (filter === "sold") {
-
     products = shopProducts.filter(function(product) {
       return product.available === false;
     });
-
   }
 
   if (!products.length) {
-
     productGrid.innerHTML = `
-      <p style="
-        padding:30px;
-        text-align:center;
-        width:100%;
-      ">
+      <p style="padding:30px;text-align:center;width:100%;">
         No products found.
       </p>
     `;
-
     return;
-
   }
-
 
   productGrid.innerHTML = products.map(function(product) {
 
@@ -151,112 +139,32 @@ function renderProducts(filter = "all") {
 
     return `
       <div class="product-card">
-
         <div style="position:relative;">
-
           <img
             src="${escapeHTML(product.image)}"
             alt="${escapeHTML(product.name)}"
-            style="
-              width:100%;
-              height:280px;
-              object-fit:cover;
-              display:block;
-            "
+            style="width:100%;height:280px;object-fit:cover;display:block;"
             onerror="this.src='logo.png'"
           >
-
           ${
             soldOut
-              ? `
-                <span style="
-                  position:absolute;
-                  top:10px;
-                  left:10px;
-                  background:#111;
-                  color:white;
-                  padding:7px 12px;
-                  border-radius:20px;
-                  font-size:12px;
-                  font-weight:bold;
-                ">
-                  SOLD OUT
-                </span>
-              `
-              : `
-                <span style="
-                  position:absolute;
-                  top:10px;
-                  left:10px;
-                  background:#16a34a;
-                  color:white;
-                  padding:7px 12px;
-                  border-radius:20px;
-                  font-size:12px;
-                  font-weight:bold;
-                ">
-                  AVAILABLE
-                </span>
-              `
+              ? `<span style="position:absolute;top:10px;left:10px;background:#111;color:white;padding:7px 12px;border-radius:20px;font-size:12px;font-weight:bold;">SOLD OUT</span>`
+              : `<span style="position:absolute;top:10px;left:10px;background:#16a34a;color:white;padding:7px 12px;border-radius:20px;font-size:12px;font-weight:bold;">AVAILABLE</span>`
           }
-
         </div>
 
-
         <div style="padding:15px;">
-
-          <h3 style="margin:0 0 8px;">
-            ${escapeHTML(product.name)}
-          </h3>
-
-          <p style="
-            font-weight:bold;
-            font-size:18px;
-            margin:0 0 12px;
-          ">
+          <h3 style="margin:0 0 8px;">${escapeHTML(product.name)}</h3>
+          <p style="font-weight:bold;font-size:18px;margin:0 0 12px;">
             ₦${product.price.toLocaleString()}
           </p>
 
-
           ${
             soldOut
-              ? `
-                <button
-                  disabled
-                  style="
-                    width:100%;
-                    padding:12px;
-                    background:#ddd;
-                    color:#777;
-                    border:none;
-                    border-radius:8px;
-                    cursor:not-allowed;
-                  "
-                >
-                  Sold Out
-                </button>
-              `
-              : `
-                <button
-                  onclick="addToCart(${JSON.stringify(product.id)})"
-                  style="
-                    width:100%;
-                    padding:12px;
-                    background:#111;
-                    color:white;
-                    border:none;
-                    border-radius:8px;
-                    font-weight:bold;
-                    cursor:pointer;
-                  "
-                >
-                  🛒 Add to Cart
-                </button>
-              `
+              ? `<button disabled style="width:100%;padding:12px;background:#ddd;color:#777;border:none;border-radius:8px;cursor:not-allowed;">Sold Out</button>`
+              : `<button onclick="addToCart(${JSON.stringify(product.id)})" style="width:100%;padding:12px;background:#111;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">🛒 Add to Cart</button>`
           }
-
         </div>
-
       </div>
     `;
 
@@ -270,17 +178,11 @@ function renderProducts(filter = "all") {
 ========================================================= */
 
 function setFilter(filter, btn) {
-
   document.querySelectorAll(".filter-btn").forEach(function(button) {
     button.classList.remove("active");
   });
-
-  if (btn) {
-    btn.classList.add("active");
-  }
-
+  if (btn) btn.classList.add("active");
   renderProducts(filter);
-
 }
 
 
@@ -289,17 +191,10 @@ function setFilter(filter, btn) {
 ========================================================= */
 
 function saveCart() {
-
-  localStorage.setItem(
-    "collins_cart",
-    JSON.stringify(cart)
-  );
-
+  localStorage.setItem("collins_cart", JSON.stringify(cart));
 }
 
-
 function addToCart(productId) {
-
   const product = shopProducts.find(function(item) {
     return String(item.id) === String(productId);
   });
@@ -314,18 +209,13 @@ function addToCart(productId) {
     return;
   }
 
-
   const existing = cart.find(function(item) {
     return String(item.id) === String(product.id);
   });
 
-
   if (existing) {
-
     existing.quantity += 1;
-
   } else {
-
     cart.push({
       id: product.id,
       name: product.name,
@@ -333,74 +223,49 @@ function addToCart(productId) {
       image: product.image,
       quantity: 1
     });
-
   }
-
 
   saveCart();
   updateCartCount();
   renderCart();
-
   alert("Added to cart! 🛒");
-
 }
 
-
 function removeFromCart(productId) {
-
   cart = cart.filter(function(item) {
     return String(item.id) !== String(productId);
   });
-
   saveCart();
   updateCartCount();
   renderCart();
-
 }
-
 
 function increaseQuantity(productId) {
-
   const item = cart.find(function(item) {
     return String(item.id) === String(productId);
   });
-
-  if (item) {
-    item.quantity += 1;
-  }
-
+  if (item) item.quantity += 1;
   saveCart();
   updateCartCount();
   renderCart();
-
 }
 
-
 function decreaseQuantity(productId) {
-
   const item = cart.find(function(item) {
     return String(item.id) === String(productId);
   });
-
   if (!item) return;
 
-
   if (item.quantity > 1) {
-
     item.quantity -= 1;
-
   } else {
-
     removeFromCart(productId);
     return;
-
   }
-
 
   saveCart();
   updateCartCount();
   renderCart();
-
 }
 
 
@@ -409,59 +274,33 @@ function decreaseQuantity(productId) {
 ========================================================= */
 
 function updateCartCount() {
-
-  const countElement =
-    document.querySelector(".cart-count");
-
+  const countElement = document.querySelector(".cart-count");
   if (!countElement) return;
 
-
   const totalItems = cart.reduce(function(total, item) {
-
     return total + Number(item.quantity || 0);
-
   }, 0);
 
-
   countElement.textContent = totalItems;
-
-  countElement.style.display =
-    totalItems > 0 ? "inline-flex" : "none";
-
+  countElement.style.display = totalItems > 0 ? "inline-flex" : "none";
 }
 
 
 /* =========================================================
-   OPEN CART
+   OPEN / CLOSE CART
 ========================================================= */
 
 function openCart() {
-
-  const overlay =
-    document.getElementById("cart-overlay");
-
+  const overlay = document.getElementById("cart-overlay");
   if (!overlay) return;
-
   overlay.classList.add("open");
-
   renderCart();
-
 }
 
-
-/* =========================================================
-   CLOSE CART
-========================================================= */
-
 function closeCart() {
-
-  const overlay =
-    document.getElementById("cart-overlay");
-
+  const overlay = document.getElementById("cart-overlay");
   if (!overlay) return;
-
   overlay.classList.remove("open");
-
 }
 
 
@@ -470,154 +309,56 @@ function closeCart() {
 ========================================================= */
 
 function renderCart() {
-
-  const container =
-    document.getElementById("cart-items");
-
-  const footer =
-    document.getElementById("cart-footer");
-
-  const totalElement =
-    document.getElementById("cart-total-amount");
-
+  const container = document.getElementById("cart-items");
+  const footer = document.getElementById("cart-footer");
+  const totalElement = document.getElementById("cart-total-amount");
 
   if (!container) return;
 
-
   if (!cart.length) {
-
     container.innerHTML = `
-      <div style="
-        padding:30px 15px;
-        text-align:center;
-        color:#777;
-      ">
+      <div style="padding:30px 15px;text-align:center;color:#777;">
         <div style="font-size:40px;">🛒</div>
         <p>Your cart is empty.</p>
       </div>
     `;
-
-    if (footer) {
-      footer.style.display = "none";
-    }
-
+    if (footer) footer.style.display = "none";
     return;
-
   }
-
 
   let total = 0;
 
-
   container.innerHTML = cart.map(function(item) {
-
-    const itemTotal =
-      Number(item.price) * Number(item.quantity);
-
+    const itemTotal = Number(item.price) * Number(item.quantity);
     total += itemTotal;
 
-
     return `
-      <div style="
-        display:flex;
-        gap:10px;
-        padding:12px 0;
-        border-bottom:1px solid #eee;
-      ">
-
+      <div style="display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #eee;">
         <img
           src="${escapeHTML(item.image || "logo.png")}"
           alt="${escapeHTML(item.name)}"
-          style="
-            width:65px;
-            height:65px;
-            object-fit:cover;
-            border-radius:8px;
-          "
+          style="width:65px;height:65px;object-fit:cover;border-radius:8px;"
           onerror="this.src='logo.png'"
         >
-
         <div style="flex:1;">
-
-          <strong>
-            ${escapeHTML(item.name)}
-          </strong>
-
-          <div style="margin-top:5px;">
-            ₦${Number(item.price).toLocaleString()}
-          </div>
-
-
-          <div style="
-            display:flex;
-            align-items:center;
-            gap:8px;
-            margin-top:8px;
-          ">
-
-            <button
-              onclick="decreaseQuantity(${JSON.stringify(item.id)})"
-              style="
-                width:30px;
-                height:30px;
-                border:1px solid #ddd;
-                background:white;
-                border-radius:6px;
-              "
-            >
-              −
-            </button>
-
+          <strong>${escapeHTML(item.name)}</strong>
+          <div style="margin-top:5px;">₦${Number(item.price).toLocaleString()}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+            <button onclick="decreaseQuantity(${JSON.stringify(item.id)})" style="width:30px;height:30px;border:1px solid #ddd;background:white;border-radius:6px;">−</button>
             <strong>${item.quantity}</strong>
-
-            <button
-              onclick="increaseQuantity(${JSON.stringify(item.id)})"
-              style="
-                width:30px;
-                height:30px;
-                border:1px solid #ddd;
-                background:white;
-                border-radius:6px;
-              "
-            >
-              +
-            </button>
-
-            <button
-              onclick="removeFromCart(${JSON.stringify(item.id)})"
-              style="
-                margin-left:auto;
-                border:none;
-                background:none;
-                color:#dc2626;
-                cursor:pointer;
-              "
-            >
-              🗑️
-            </button>
-
+            <button onclick="increaseQuantity(${JSON.stringify(item.id)})" style="width:30px;height:30px;border:1px solid #ddd;background:white;border-radius:6px;">+</button>
+            <button onclick="removeFromCart(${JSON.stringify(item.id)})" style="margin-left:auto;border:none;background:none;color:#dc2626;cursor:pointer;">🗑️</button>
           </div>
-
         </div>
-
       </div>
     `;
-
   }).join("");
 
-
   if (totalElement) {
-
-    totalElement.textContent =
-      "₦" + total.toLocaleString();
-
+    totalElement.textContent = "₦" + total.toLocaleString();
   }
 
-
-  if (footer) {
-    footer.style.display = "block";
-  }
-
+  if (footer) footer.style.display = "block";
 }
 
 
@@ -626,74 +367,34 @@ function renderCart() {
 ========================================================= */
 
 function openCheckout() {
-
   if (!cart.length) {
-
     alert("Your cart is empty.");
-
     return;
-
   }
-
-
-  const modal =
-    document.getElementById("checkout-modal");
-
+  const modal = document.getElementById("checkout-modal");
   if (!modal) return;
-
-
   updateCheckoutTotal();
-
   modal.classList.add("open");
-
 }
-
 
 function closeCheckout() {
-
-  const modal =
-    document.getElementById("checkout-modal");
-
+  const modal = document.getElementById("checkout-modal");
   if (!modal) return;
-
   modal.classList.remove("open");
-
 }
 
-
 function updateCheckoutTotal() {
-
   let total = cart.reduce(function(sum, item) {
-
-    return sum +
-      Number(item.price) *
-      Number(item.quantity);
-
+    return sum + Number(item.price) * Number(item.quantity);
   }, 0);
 
+  const delivery = document.querySelector('input[name="delivery"]:checked');
+  if (delivery && delivery.value === "delivery") total += 2000;
 
-  const delivery =
-    document.querySelector(
-      'input[name="delivery"]:checked'
-    );
-
-
-  if (delivery && delivery.value === "delivery") {
-    total += 2000;
-  }
-
-
-  const totalElement =
-    document.getElementById("checkout-total");
-
-
+  const totalElement = document.getElementById("checkout-total");
   if (totalElement) {
-
-    totalElement.textContent =
-      "₦" + total.toLocaleString();
-
+    totalElement.textContent = "₦" + total.toLocaleString();
   }
-
 }
 
 
@@ -702,381 +403,123 @@ function updateCheckoutTotal() {
 ========================================================= */
 
 async function placeOrder(event) {
-
   event.preventDefault();
 
-
   if (!cart.length) {
-
     alert("Your cart is empty.");
-
     return;
-
   }
 
-
-  const name =
-    document.getElementById("cust-name").value.trim();
-
-  const phone =
-    document.getElementById("cust-phone").value.trim();
-
-  const address =
-    document.getElementById("cust-address").value.trim();
-
-  const note =
-    document.getElementById("cust-note").value.trim();
-
-
-  const delivery =
-    document.querySelector(
-      'input[name="delivery"]:checked'
-    );
-
+  const name = document.getElementById("cust-name").value.trim();
+  const phone = document.getElementById("cust-phone").value.trim();
+  const address = document.getElementById("cust-address").value.trim();
+  const note = document.getElementById("cust-note").value.trim();
+  const delivery = document.querySelector('input[name="delivery"]:checked');
 
   if (!name || !phone) {
-
     alert("Please enter your name and phone number.");
-
     return;
-
   }
 
-
-  if (
-    delivery &&
-    delivery.value === "delivery" &&
-    !address
-  ) {
-
+  if (delivery && delivery.value === "delivery" && !address) {
     alert("Please enter your delivery address.");
-
     return;
-
   }
 
-
-  const subtotal =
-    cart.reduce(function(sum, item) {
-
-      return sum +
-        Number(item.price) *
-        Number(item.quantity);
-
-    }, 0);
-
-
-  const deliveryFee =
-    delivery &&
-    delivery.value === "delivery"
-      ? 2000
-      : 0;
-
-
-  const total =
-    subtotal + deliveryFee;
-
-
-  const orderItems =
-    cart.map(function(item) {
-
-      return {
-        product_id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity
-      };
-
-    });
-
-
-  /* ============================================
-     SAVE ORDER TO SUPABASE
-  ============================================ */
-
-  let supabaseSaved = false;
-
-
-  if (shopSupabase) {
-
-    try {
-
-      const { error } =
-        await shopSupabase
-          .from("orders")
-          .insert({
-
-            customer_name: name,
-
-            phone: phone,
-
-            address:
-              delivery &&
-              delivery.value === "delivery"
-                ? address
-                : "Pickup",
-
-            total: total,
-
-            status: "Pending"
-
-          });
-
-
-      if (!error) {
-        supabaseSaved = true;
-      } else {
-        console.warn(
-          "Order was not saved to Supabase:",
-          error.message
-        );
-      }
-
-    } catch (error) {
-
-      console.warn(
-        "Supabase order error:",
-        error
-      );
-
-    }
-
-  }
-
-
-  /* ============================================
-     SAVE LOCAL ORDER TOO
-  ============================================ */
-
-  const order = {
-
-    id: Date.now(),
-
-    customer_name: name,
-
-    phone: phone,
-
-    address:
-      delivery &&
-      delivery.value === "delivery"
-        ? address
-        : "Pickup",
-
-    note: note,
-
-    delivery:
-      delivery
-        ? delivery.value
-        : "pickup",
-
-    items: orderItems,
-
-    total: total,
-
-    status: "Pending",
-
-    created_at:
-      new Date().toISOString()
-
-  };
-
-
-  const oldOrders =
-    JSON.parse(
-      localStorage.getItem("collins_orders") || "[]"
-    );
-
-
-  oldOrders.unshift(order);
-
-
-  localStorage.setItem(
-    "collins_orders",
-    JSON.stringify(oldOrders)
-  );
-
-
-  /* ============================================
-     WHATSAPP MESSAGE
-  ============================================ */
-
-  let message =
-    "Hello Collins Clothing!%0A%0A" +
-    "*NEW ORDER*%0A%0A";
-
-
-  message +=
-    "Name: " +
-    encodeURIComponent(name) +
-    "%0A";
-
-
-  message +=
-    "Phone: " +
-    encodeURIComponent(phone) +
-    "%0A";
-
-
-  message +=
-    "Option: " +
-    encodeURIComponent(
-      delivery
-        ? delivery.value
-        : "pickup"
-    ) +
-    "%0A";
-
-
-  if (
-    delivery &&
-    delivery.value === "delivery"
-  ) {
-
-    message +=
-      "Address: " +
-      encodeURIComponent(address) +
-      "%0A";
-
-  }
-
-
-  message += "%0A*Items:*%0A";
-
-
-  cart.forEach(function(item) {
-
-    message +=
-      encodeURIComponent(
-        item.name +
-        " x" +
-        item.quantity +
-        " = ₦" +
-        (
-          Number(item.price) *
-          Number(item.quantity)
-        ).toLocaleString()
-      ) +
-      "%0A";
-
+  const subtotal = cart.reduce(function(sum, item) {
+    return sum + Number(item.price) * Number(item.quantity);
+  }, 0);
+
+  const deliveryFee = (delivery && delivery.value === "delivery") ? 2000 : 0;
+  const total = subtotal + deliveryFee;
+
+  const orderItems = cart.map(function(item) {
+    return {
+      product_id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity
+    };
   });
 
-
-  message +=
-    "%0ASubtotal: ₦" +
-    subtotal.toLocaleString();
-
-
-  if (deliveryFee > 0) {
-
-    message +=
-      "%0ADelivery: ₦2,000";
-
+  // Save to Supabase
+  if (shopSupabase) {
+    try {
+      await shopSupabase.from("orders").insert({
+        customer_name: name,
+        customer_phone: phone,
+        customer_address: (delivery && delivery.value === "delivery") ? address : "Pickup",
+        note: note,
+        delivery: delivery ? delivery.value : "pickup",
+        items: orderItems,
+        subtotal: subtotal,
+        delivery_fee: deliveryFee,
+        total: total,
+        status: "pending"
+      });
+    } catch (error) {
+      console.warn("Supabase order error:", error);
+    }
   }
 
+  // WhatsApp message
+  let message = "Hello Collins Clothing!%0A%0A*NEW ORDER*%0A%0A";
+  message += "Name: " + encodeURIComponent(name) + "%0A";
+  message += "Phone: " + encodeURIComponent(phone) + "%0A";
+  message += "Option: " + encodeURIComponent(delivery ? delivery.value : "pickup") + "%0A";
 
-  message +=
-    "%0A*TOTAL: ₦" +
-    total.toLocaleString() +
-    "*";
-
-
-  if (note) {
-
-    message +=
-      "%0ANote: " +
-      encodeURIComponent(note);
-
+  if (delivery && delivery.value === "delivery") {
+    message += "Address: " + encodeURIComponent(address) + "%0A";
   }
 
+  message += "%0A*Items:*%0A";
+  cart.forEach(function(item) {
+    message += encodeURIComponent(item.name + " x" + item.quantity + " = ₦" + (Number(item.price) * Number(item.quantity)).toLocaleString()) + "%0A";
+  });
 
-  message +=
-    "%0A%0APayment: PiggyVest";
+  message += "%0ASubtotal: ₦" + subtotal.toLocaleString();
+  if (deliveryFee > 0) message += "%0ADelivery: ₦2,000";
+  message += "%0A*TOTAL: ₦" + total.toLocaleString() + "*";
+  if (note) message += "%0ANote: " + encodeURIComponent(note);
+  message += "%0A%0APayment: PiggyVest";
 
-
-  /* ============================================
-     CLEAR CART
-  ============================================ */
-
+  // Clear cart
   cart = [];
-
   saveCart();
-
   updateCartCount();
-
   closeCheckout();
-
   closeCart();
-
-
   document.getElementById("checkout-form").reset();
-
   updateCheckoutTotal();
 
-
-  /* ============================================
-     OPEN WHATSAPP
-  ============================================ */
-
-  window.open(
-    "https://wa.me/2349047101249?text=" +
-    message,
-    "_blank"
-  );
-
-
-  if (supabaseSaved) {
-
-    alert(
-      "Order placed successfully! ✅\n\n" +
-      "Your order has also been sent to Collins Clothing."
-    );
-
-  } else {
-
-    alert(
-      "Order prepared successfully! ✅\n\n" +
-      "WhatsApp will open so the shop can receive your order."
-    );
-
-  }
-
+  window.open("https://wa.me/2349047101249?text=" + message, "_blank");
+  alert("Order placed successfully! ✅");
 }
 
 
 /* =========================================================
-   ESCAPE HTML
+   HELPERS
 ========================================================= */
 
 function escapeHTML(value) {
-
   return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-
 }
 
 
 /* =========================================================
-   START SHOP
+   START
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function() {
-
   loadProductsFromSupabase();
-
   updateCartCount();
-
   renderCart();
-
 });
-
-
-/* =========================================================
-   MAKE FUNCTIONS AVAILABLE TO index.html
-========================================================= */
 
 window.setFilter = setFilter;
 window.addToCart = addToCart;
