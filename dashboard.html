@@ -3,91 +3,1064 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CEO Dashboard</title>
+
+  <title>CEO Dashboard - Collins Clothing</title>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
   <style>
-    body { margin:0; font-family:system-ui,sans-serif; background:#f1f5f9; }
-    .login-box {
-      max-width:380px; margin:80px auto; background:white;
-      padding:30px; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.08);
-      text-align:center;
+    * {
+      box-sizing: border-box;
     }
-    .login-box input {
-      width:100%; padding:14px; margin:8px 0; border:1px solid #ddd;
-      border-radius:8px; font-size:16px; box-sizing:border-box;
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #111827;
     }
-    .login-box button {
-      width:100%; padding:14px; background:#111; color:white;
-      border:none; border-radius:8px; font-size:16px; font-weight:600; margin-top:10px;
+
+    .hidden {
+      display: none !important;
     }
-    #message { margin-top:15px; color:#dc2626; font-size:14px; }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: none;
+      border-radius: 9px;
+      padding: 11px 15px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      margin-bottom: 12px;
+      outline: none;
+      background: white;
+    }
+
+    input:focus {
+      border-color: #111827;
+    }
+
+    /* ================= LOGIN ================= */
+
+    #login-box {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #111827, #374151);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: white;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.25);
+    }
+
+    .login-card h1 {
+      text-align: center;
+      margin: 0 0 8px;
+    }
+
+    .login-card p {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 25px;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: #111827;
+      color: white;
+      padding: 14px;
+    }
+
+    #login-message,
+    #product-message {
+      margin-top: 12px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    /* ================= HEADER ================= */
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .logout-btn {
+      background: #ef4444;
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* ================= STATS ================= */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.07);
+    }
+
+    .stat small {
+      color: #64748b;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 30px;
+      margin-top: 8px;
+    }
+
+    /* ================= SECTIONS ================= */
+
+    .section {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.07);
+    }
+
+    .section h2 {
+      margin-top: 0;
+    }
+
+    /* ================= ADD PRODUCT ================= */
+
+    .preview {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      display: none;
+      margin-bottom: 12px;
+    }
+
+    .add-btn {
+      background: #16a34a;
+      color: white;
+    }
+
+    /* ================= TOOLBAR ================= */
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .toolbar h2 {
+      margin: 0;
+    }
+
+    .refresh-btn {
+      background: #2563eb;
+      color: white;
+    }
+
+    /* ================= PRODUCTS ================= */
+
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .product-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 13px;
+      padding: 15px;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #e2e8f0;
+      margin-bottom: 12px;
+    }
+
+    .product-card input {
+      margin-bottom: 8px;
+    }
+
+    .product-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .save-btn {
+      background: #2563eb;
+      color: white;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+      color: white;
+    }
+
+    .status-available {
+      background: #16a34a;
+      color: white;
+    }
+
+    .status-sold {
+      background: #64748b;
+      color: white;
+    }
+
+    /* ================= ORDERS ================= */
+
+    .order-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+    }
+
+    .order-card p {
+      margin: 6px 0;
+    }
+
+    .empty {
+      color: #64748b;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* ================= MOBILE ================= */
+
+    @media (max-width: 800px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .product-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 12px;
+      }
+
+      .section {
+        padding: 15px;
+      }
+
+      header h1 {
+        font-size: 18px;
+      }
+
+      .stat strong {
+        font-size: 24px;
+      }
+    }
   </style>
 </head>
+
 <body>
 
-  <div class="login-box">
-    <h2>CEO Login</h2>
-    <p style="color:#666;margin-bottom:20px;">Collins Clothing Admin</p>
+  <!-- =====================================================
+       LOGIN
+  ====================================================== -->
 
-    <input type="email" id="email" placeholder="Admin email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="doLogin()">Login</button>
+  <div id="login-box">
 
-    <p id="message"></p>
+    <div class="login-card">
+
+      <h1>CEO Login 🔐</h1>
+
+      <p>Collins Clothing Admin</p>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Admin email"
+        autocomplete="email"
+      >
+
+      <input
+        type="password"
+        id="pass"
+        placeholder="Password"
+        autocomplete="current-password"
+      >
+
+      <button
+        class="login-btn"
+        id="loginBtn"
+        onclick="login()"
+      >
+        Login
+      </button>
+
+      <div id="login-message"></div>
+
+    </div>
+
   </div>
 
-  <script src="supabase-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- =====================================================
+       DASHBOARD
+  ====================================================== -->
+
+  <div id="app" class="hidden">
+
+    <header>
+
+      <h1>Collins Clothing — CEO Dashboard 👑</h1>
+
+      <button
+        class="logout-btn"
+        onclick="logout()"
+      >
+        Logout
+      </button>
+
+    </header>
+
+
+    <main class="container">
+
+      <!-- ================= STATS ================= -->
+
+      <div class="stats">
+
+        <div class="stat">
+          <small>Total Products</small>
+          <strong id="t">0</strong>
+        </div>
+
+        <div class="stat">
+          <small>Available</small>
+          <strong id="a">0</strong>
+        </div>
+
+        <div class="stat">
+          <small>Sold Out</small>
+          <strong id="s">0</strong>
+        </div>
+
+        <div class="stat">
+          <small>Orders</small>
+          <strong id="o">0</strong>
+        </div>
+
+      </div>
+
+
+      <!-- ================= ADD PRODUCT ================= -->
+
+      <section class="section">
+
+        <h2>➕ Add New Product</h2>
+
+        <input
+          type="text"
+          id="nname"
+          placeholder="Product name"
+        >
+
+        <input
+          type="number"
+          id="nprice"
+          placeholder="Price in ₦"
+          min="0"
+        >
+
+        <input
+          type="file"
+          id="img"
+          accept="image/*"
+          onchange="previewImage()"
+        >
+
+        <img
+          id="prev"
+          class="preview"
+          alt="Preview"
+        >
+
+        <button
+          class="add-btn"
+          onclick="addProduct()"
+        >
+          Add Product
+        </button>
+
+        <div id="product-message"></div>
+
+      </section>
+
+
+      <!-- ================= MANAGE PRODUCTS ================= -->
+
+      <section class="section">
+
+        <div class="toolbar">
+
+          <h2>🛍️ Manage Products</h2>
+
+          <button
+            class="refresh-btn"
+            onclick="loadProducts()"
+          >
+            🔄 Refresh
+          </button>
+
+        </div>
+
+        <div
+          id="plist"
+          class="product-list"
+        >
+          <p class="empty">
+            Login to load products...
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- ================= ORDERS ================= -->
+
+      <section class="section">
+
+        <div class="toolbar">
+
+          <h2>📦 Orders</h2>
+
+          <button
+            class="refresh-btn"
+            onclick="loadOrders()"
+          >
+            🔄 Refresh Orders
+          </button>
+
+        </div>
+
+        <div id="orders">
+
+          <p class="empty">
+            Login to load orders...
+          </p>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
 
   <script>
-    // Check if config is loaded
-    if (typeof SUPABASE_URL === "undefined" || typeof SUPABASE_ANON_KEY === "undefined") {
-      document.getElementById("message").textContent = "Error: supabase-config.js is not loaded correctly";
+
+    /* =====================================================
+       SUPABASE
+    ====================================================== */
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+
+    /* =====================================================
+       HELPERS
+    ====================================================== */
+
+    function showMessage(
+      elementId,
+      message,
+      success = false
+    ) {
+
+      const element =
+        document.getElementById(elementId);
+
+      if (!element) return;
+
+      element.textContent = message;
+
+      element.style.color =
+        success
+          ? "#16a34a"
+          : "#dc2626";
     }
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function doLogin() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const msg = document.getElementById("message");
+    function formatMoney(value) {
 
-      msg.style.color = "#dc2626";
-      msg.textContent = "Trying to login...";
+      return "₦" +
+        Number(value || 0)
+          .toLocaleString("en-NG");
+    }
+
+
+    function escapeHTML(value) {
+
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
+    /* =====================================================
+       LOGIN
+    ====================================================== */
+
+    async function login() {
+
+      const email =
+        document
+          .getElementById("email")
+          .value
+          .trim();
+
+      const password =
+        document
+          .getElementById("pass")
+          .value;
 
       if (!email || !password) {
-        msg.textContent = "Please enter email and password";
+
+        showMessage(
+          "login-message",
+          "Please enter your email and password."
+        );
+
         return;
       }
 
+      const button =
+        document.getElementById("loginBtn");
+
+      button.disabled = true;
+      button.textContent = "Logging in...";
+
+      showMessage(
+        "login-message",
+        "Checking login..."
+      );
+
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
+
+        const {
+          data,
+          error
+        } =
+          await supabaseClient.auth
+            .signInWithPassword({
+              email: email,
+              password: password
+            });
 
         if (error) {
-          msg.textContent = "Error: " + error.message;
+
+          console.error(error);
+
+          showMessage(
+            "login-message",
+            error.message
+          );
+
           return;
         }
 
-        // Success
-        msg.style.color = "green";
-        msg.textContent = "Login successful! Redirecting...";
-        
-        // Go to the full dashboard (we will add it next)
-        setTimeout(function() {
-          window.location.href = "dashboard.html?loggedin=1";
-        }, 1000);
+        if (!data || !data.user) {
 
-      } catch (err) {
-        msg.textContent = "Unexpected error: " + err.message;
+          showMessage(
+            "login-message",
+            "Login failed. Please try again."
+          );
+
+          return;
+        }
+
+        document
+          .getElementById("login-box")
+          .classList.add("hidden");
+
+        document
+          .getElementById("app")
+          .classList.remove("hidden");
+
+        showMessage(
+          "login-message",
+          ""
+        );
+
+        await loadDashboard();
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "login-message",
+          "Login error: " +
+          error.message
+        );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "Login";
       }
     }
 
-    // Enter key
-    document.getElementById("password").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") doLogin();
-    });
-  </script>
-</body>
-</html>
+
+    /* =====================================================
+       CHECK EXISTING LOGIN
+    ====================================================== */
+
+    async function checkSession() {
+
+      try {
+
+        const {
+          data
+        } =
+          await supabaseClient.auth
+            .getSession();
+
+        if (
+          data &&
+          data.session &&
+          data.session.user
+        ) {
+
+          document
+            .getElementById("login-box")
+            .classList.add("hidden");
+
+          document
+            .getElementById("app")
+            .classList.remove("hidden");
+
+          await loadDashboard();
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Session check error:",
+          error
+        );
+      }
+    }
+
+
+    /* =====================================================
+       LOGOUT
+    ====================================================== */
+
+    async function logout() {
+
+      try {
+
+        await supabaseClient.auth.signOut();
+
+      } catch (error) {
+
+        console.error(error);
+      }
+
+      document
+        .getElementById("app")
+        .classList.add("hidden");
+
+      document
+        .getElementById("login-box")
+        .classList.remove("hidden");
+
+      document
+        .getElementById("pass")
+        .value = "";
+
+      document
+        .getElementById("plist")
+        .innerHTML =
+          '<p class="empty">Login to load products...</p>';
+
+      document
+        .getElementById("orders")
+        .innerHTML =
+          '<p class="empty">Login to load orders...</p>';
+    }
+
+
+    /* =====================================================
+       LOAD DASHBOARD
+    ====================================================== */
+
+    async function loadDashboard() {
+
+      await loadProducts();
+
+      await loadOrders();
+    }
+
+
+    /* =====================================================
+       LOAD PRODUCTS
+    ====================================================== */
+
+    async function loadProducts() {
+
+      const container =
+        document.getElementById("plist");
+
+      container.innerHTML =
+        '<p class="empty">Loading products...</p>';
+
+      try {
+
+        const {
+          data: products,
+          error
+        } =
+          await supabaseClient
+            .from("products")
+            .select("*");
+
+        if (error) {
+
+          console.error(error);
+
+          container.innerHTML =
+            `<p class="empty">
+              Unable to load products.<br><br>
+              ${escapeHTML(error.message)}
+            </p>`;
+
+          return;
+        }
+
+        const list =
+          products || [];
+
+        updateProductStats(list);
+
+        renderProducts(list);
+
+      } catch (error) {
+
+        console.error(error);
+
+        container.innerHTML =
+          `<p class="empty">
+            Unable to load products.<br><br>
+            ${escapeHTML(error.message)}
+          </p>`;
+      }
+    }
+
+
+    /* =====================================================
+       PRODUCT STATS
+    ====================================================== */
+
+    function updateProductStats(products) {
+
+      const total =
+        products.length;
+
+      const available =
+        products.filter(
+          product =>
+            product.available !== false
+        ).length;
+
+      const sold =
+        total - available;
+
+      document.getElementById("t")
+        .textContent = total;
+
+      document.getElementById("a")
+        .textContent = available;
+
+      document.getElementById("s")
+        .textContent = sold;
+    }
+
+
+    /* =====================================================
+       RENDER PRODUCTS
+    ====================================================== */
+
+    function renderProducts(products) {
+
+      const container =
+        document.getElementById("plist");
+
+      if (!products.length) {
+
+        container.innerHTML =
+          '<p class="empty">No products found in Supabase.</p>';
+
+        return;
+      }
+
+      container.innerHTML =
+        products.map(product => {
+
+          const id =
+            JSON.stringify(product.id);
+
+          const safeId =
+            escapeHTML(product.id);
+
+          const name =
+            escapeHTML(
+              product.name || ""
+            );
+
+          const price =
+            Number(product.price) || 0;
+
+          const image =
+            product.image_url ||
+            "logo.png";
+
+          const safeImage =
+            escapeHTML(image);
+
+          const available =
+            product.available !== false;
+
+          return `
+
+            <div
+              class="product-card"
+              id="product-${safeId}"
+            >
+
+              <img
+                src="${safeImage}"
+                alt="${name}"
+                onerror="this.src='logo.png'"
+              >
+
+              <input
+                type="text"
+                id="name-${safeId}"
+                value="${name}"
+                placeholder="Product name"
+              >
+
+              <input
+                type="number"
+                id="price-${safeId}"
+                value="${price}"
+                min="0"
+                placeholder="Price"
+              >
+
+              <div class="product-buttons">
+
+                <button
+                  class="${
+                    available
+                      ? "status-available"
+                      : "status-sold"
+                  }"
+                  onclick="toggleProduct(${id}, ${available})"
+                >
+                  ${
+                    available
+                      ? "Available ✅"
+                      : "Sold Out ❌"
+                  }
+                </button>
+
+                <button
+                  class="save-btn"
+                  onclick="saveProduct(${id})"
+                >
+                  Save 💾
+                </button>
+
+                <button
+                  class="delete-btn"
+                  onclick="deleteProduct(${id})"
+                >
+                  Delete 🗑️
+                </button>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }).join("");
+    }
+
+
+    /* =====================================================
+       PREVIEW IMAGE
+    ====================================================== */
+
+    function previewImage() {
+
+      const input =
+        document.getElementById("img");
+
+      const preview =
+        document.getElementById("prev");
+
+      const file =
+        input.files[0];
+
+      if (!file) {
+
+        preview.src = "";
+        preview.style.display = "none";
+
+        return;
+      }
+
+      preview.src =
+        URL.createObjectURL(file);
+
+      preview.style.display =
+        "block";
+    }
+
+
+    /* =====================================================
+       ADD PRODUCT
+    ====================================================== */
+
+    async function addProduct() {
+
+      const name =
+        document
+          .getElementById("nname")
+          .value
+          .trim();
+
+      const price =
+        Number(
+          document
+            .getElementById("nprice")
+            .value
+        );
+
+      const file =
+        document
+          .getElementById("img")
+          .files[0];
+
+      if (!name) {
+
+        showMessage(
+          "product-message",
+          "Please enter the product name."
+        );
+
+        return;
+      }
+
+      if (
+        !Number.isFinite(price) ||
+        price < 0
+      ) {
+
+        showMessage(
+          "product-message",
+          "Please enter a valid price."
+        );
+
+        return;
+      }
+
+      if (!file) {
+
+        showMessage(
+          "product-message",
+          "Please choose a product image."
+        );
+
+        return;
+      }
+
+      showMessage(
+        "product-message",
+        "Uploading product..."
+      );
+
+      try {
+
+        const extensio
