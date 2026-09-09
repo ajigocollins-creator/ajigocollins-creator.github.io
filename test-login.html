@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Login</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; background: #f5f5f5; }
+    .box { max-width: 360px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; }
+    input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    button { width: 100%; padding: 14px; background: #111; color: white; border: none; border-radius: 6px; font-size: 16px; }
+    #msg { margin-top: 15px; color: red; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Test Login</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="msg"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Put your real keys here temporarily
+    const SUPABASE_URL = "https://tbdhphqtttqbnpvfaijo.supabase.co";
+    const SUPABASE_ANON_KEY = "PASTE_YOUR_FULL_ANON_KEY_HERE";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("msg");
+
+      msg.style.color = "red";
+      msg.textContent = "Trying...";
+
+      if (!email || !password) {
+        msg.textContent = "Enter email and password";
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        msg.textContent = "Error: " + error.message;
+      } else {
+        msg.style.color = "green";
+        msg.textContent = "SUCCESS! Login worked.";
+      }
+    }
+  </script>
+</body>
+      </html>
