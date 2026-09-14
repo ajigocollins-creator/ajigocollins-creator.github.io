@@ -72,15 +72,9 @@ async function loadProductsFromSupabase() {
       );
     }
 
-    const {
-      data,
-      error
-    } = await shopSupabase
-      .from("products")
-      .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+   const { data, error } = await shopSupabase
+  .from("products")
+  .select("*");
 
     if (error) {
       throw error;
