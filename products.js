@@ -50,7 +50,7 @@ async function loadProductsFromSupabase() {
         id: product.id,
         name: product.name || "Unnamed Product",
         price: Number(product.price) || 0,
-        image: product.image || "logo.png",
+        image: product.image ? product.image : "logo.png",
         available: product.available !== false
       };
     });
