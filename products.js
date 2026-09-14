@@ -50,7 +50,23 @@ async function loadProductsFromSupabase() {
         id: product.id,
         name: product.name || "Unnamed Product",
         price: Number(product.price) || 0,
-        image: product.image ? product.image : "logo.png",
+        shopProducts = (data || []).map(function(product) {
+  let img = product.image || "";
+  
+  // If the image is just a filename, keep it
+  // If it's empty, use logo
+  if (!img || img === "null" || img === "undefined") {
+    img = "logo.png";
+  }
+
+  return {
+    id: product.id,
+    name: product.name || "Unnamed Product",
+    price: Number(product.price) || 0,
+    image: img,
+    available: product.available !== false
+  };
+});
         available: product.available !== false
       };
     });
