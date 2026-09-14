@@ -105,7 +105,8 @@ if (!shopSupabase) {
 
 const { data, error } = await shopSupabase  
   .from("products")  
-  .select("*");  
+  .select("*"); 
+  .order("id");
 
 if (error) {  
   throw error;  
