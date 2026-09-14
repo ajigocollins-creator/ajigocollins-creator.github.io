@@ -1,1121 +1,1108 @@
-// ============================================
-// COLLINS CLOTHING - SHOP PRODUCTS
-// ============================================
+/* =========================================================
+COLLINS CLOTHING - CUSTOMER SHOP
+Supabase + Products + Cart + Checkout
+========================================================= */
 
 let shopProducts = [];
-
 let currentFilter = "all";
+let cart = JSON.parse(localStorage.getItem("collins_cart") || "[]");
 
-let currentCategory = "all";
+const productGrid = document.getElementById("product-grid");
 
-let cart =
-  JSON.parse(
-    localStorage.getItem("collins_cart") || "[]"
-  );
+/* =========================================================
+SUPABASE
+========================================================= */
 
+let shopSupabase = null;
 
-// ============================================
-// SUPABASE
-// ============================================
+try {
+if (
+window.supabase &&
+typeof SUPABASE_URL !== "undefined" &&
+typeof SUPABASE_ANON_KEY !== "undefined"
+) {
+shopSupabase = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+}
+} catch (error) {
+console.error("Supabase connection error:", error);
+}
 
-const shopSupabase =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+/* =========================================================
+TOAST NOTIFICATION
+Replaces browser alert popups
+========================================================= */
 
+function showToast(message, type = "success") {
 
-// ============================================
-// LOAD PRODUCTS
-// ============================================
+let toast = document.getElementById("collins-toast");
+
+if (!toast) {
+toast = document.createElement("div");
+toast.id = "collins-toast";
+
+toast.style.position = "fixed";  
+toast.style.left = "50%";  
+toast.style.bottom = "25px";  
+toast.style.transform = "translateX(-50%) translateY(20px)";  
+toast.style.background = "#111";  
+toast.style.color = "#fff";  
+toast.style.padding = "14px 20px";  
+toast.style.borderRadius = "12px";  
+toast.style.fontSize = "15px";  
+toast.style.fontWeight = "600";  
+toast.style.zIndex = "999999";  
+toast.style.boxShadow = "0 8px 30px rgba(0,0,0,0.25)";  
+toast.style.opacity = "0";  
+toast.style.transition = "all 0.3s ease";  
+toast.style.maxWidth = "90%";  
+toast.style.textAlign = "center";  
+
+document.body.appendChild(toast);
+
+}
+
+if (type === "error") {
+toast.style.background = "#dc2626";
+} else if (type === "warning") {
+toast.style.background = "#f59e0b";
+} else {
+toast.style.background = "#111";
+}
+
+toast.textContent = message;
+
+clearTimeout(window.collinsToastTimer);
+
+requestAnimationFrame(function() {
+toast.style.opacity = "1";
+toast.style.transform = "translateX(-50%) translateY(0)";
+});
+
+window.collinsToastTimer = setTimeout(function() {
+toast.style.opacity = "0";
+toast.style.transform = "translateX(-50%) translateY(20px)";
+}, 2500);
+}
+
+/* =========================================================
+LOAD PRODUCTS FROM SUPABASE
+========================================================= */
 
 async function loadProductsFromSupabase() {
 
-  try {
+if (!productGrid) return;
 
-    const { data, error } =
-      await shopSupabase
-        .from("products")
-        .select("*")
-        .order("created_at", {
-          ascending: false
-        });
+productGrid.innerHTML =   <p style="padding:30px;text-align:center;">   Loading products...   </p>  ;
 
+try {
 
-    if (error) {
-      throw error;
-    }
+if (!shopSupabase) {  
+  throw new Error("Supabase is not connected.");  
+}  
 
+const { data, error } = await shopSupabase  
+  .from("products")  
+  .select("*");  
 
-    shopProducts =
-      (data || []).map(product => {
+if (error) {  
+  throw error;  
+}  
 
-        const productImage =
-          product.image_url ||
-          product.image ||
-          "logo.png";
+console.log("Products received from Supabase:", data);  
 
+shopProducts = (data || []).map(function(product) {  
 
-        return {
+  /*  
+    IMPORTANT:  
+    Your Supabase database uses image_url.  
 
-          id: product.id,
+    We also check image as a backup in case  
+    an older product uses that column.  
+  */  
 
-          name:
-            product.name ||
-            "Unnamed Product",
+  const productImage =  
+    product.image_url ||  
+    product.image ||  
+    "logo.png";  
 
-          price:
-            Number(product.price) || 0,
+  return {  
+    id: product.id,  
+    name: product.name || "Unnamed Product",  
+    price: Number(product.price) || 0,  
+    image: productImage,  
+    image_url: productImage,  
+    available: product.available !== false  
+  };  
 
-          image:
-            productImage,
+});  
 
-          image_url:
-            productImage,
+console.log("Shop products:", shopProducts);  
 
-          category:
-            normalizeCategory(
-              product.category
-            ),
+renderProducts(currentFilter);  
+updateCartCount();
 
-          available:
-            product.available !== false
+} catch (error) {
 
-        };
+console.error("Supabase product error:", error);  
 
-      });
+productGrid.innerHTML = `  
+  <div style="  
+    margin:20px;  
+    padding:20px;  
+    background:#fff0f0;  
+    color:#b00020;  
+    border:1px solid #ffb3b3;  
+    border-radius:10px;  
+    text-align:center;  
+  ">  
+    <strong>Unable to load products.</strong>  
+    <br><br>  
+    ${escapeHTML(error.message || "Unknown error")}  
+  </div>  
+`;
 
+}
+}
 
-    createCategoryButtons();
+/* =========================================================
+RENDER PRODUCTS
+========================================================= */
 
-    renderProducts();
+function renderProducts(filter = "all") {
 
+currentFilter = filter;
 
-  } catch (error) {
+if (!productGrid) return;
 
-    console.error(
-      "Product loading error:",
-      error
-    );
+let products = shopProducts;
 
+if (filter === "available") {
+products = shopProducts.filter(function(product) {
+return product.available === true;
+});
+}
 
-    const grid =
-      document.getElementById(
-        "product-grid"
-      );
+if (filter === "sold") {
+products = shopProducts.filter(function(product) {
+return product.available === false;
+});
+}
 
+if (!products.length) {
 
-    if (grid) {
+productGrid.innerHTML = `  
+  <p style="  
+    padding:30px;  
+    text-align:center;  
+    width:100%;  
+  ">  
+    No products found.  
+  </p>  
+`;  
 
-      grid.innerHTML = `
-        <div style="
-          grid-column:1/-1;
-          text-align:center;
-          padding:40px;
-        ">
-          <h3>Unable to load products</h3>
-          <p>${escapeHtml(
-            error.message
-          )}</p>
-        </div>
-      `;
-
-    }
-
-  }
+return;
 
 }
 
+productGrid.innerHTML = products.map(function(product) {
 
-// ============================================
-// CATEGORY NORMALIZER
-// ============================================
+const soldOut = product.available === false;  
 
-function normalizeCategory(category) {
+/*  
+  Only use logo if there is genuinely no image URL.  
+*/  
+const imageSource =  
+  product.image_url ||  
+  product.image ||  
+  "logo.png";  
 
-  if (!category) {
-    return "T-Shirts";
-  }
+return `  
+  <div class="product-card">  
 
+    <div style="position:relative;">  
 
-  const value =
-    String(category)
-      .trim()
-      .toLowerCase();
+      <img  
+        src="${escapeHTML(imageSource)}"  
+        alt="${escapeHTML(product.name)}"  
+        style="  
+          width:100%;  
+          height:280px;  
+          object-fit:cover;  
+          display:block;  
+        "  
+        onerror="this.onerror=null; this.src='logo.png';"  
+      >  
 
+      ${  
+        soldOut  
+          ? `  
+            <span style="  
+              position:absolute;  
+              top:10px;  
+              left:10px;  
+              background:#111;  
+              color:white;  
+              padding:7px 12px;  
+              border-radius:20px;  
+              font-size:12px;  
+              font-weight:bold;  
+            ">  
+              SOLD OUT  
+            </span>  
+          `  
+          : `  
+            <span style="  
+              position:absolute;  
+              top:10px;  
+              left:10px;  
+              background:#16a34a;  
+              color:white;  
+              padding:7px 12px;  
+              border-radius:20px;  
+              font-size:12px;  
+              font-weight:bold;  
+            ">  
+              AVAILABLE  
+            </span>  
+          `  
+      }  
 
-  if (
-    value === "t-shirt" ||
-    value === "tshirts" ||
-    value === "t-shirts"
-  ) {
+    </div>  
 
-    return "T-Shirts";
+    <div style="padding:15px;">  
 
-  }
+      <h3 style="margin:0 0 8px;">  
+        ${escapeHTML(product.name)}  
+      </h3>  
 
+      <p style="  
+        font-weight:bold;  
+        font-size:18px;  
+        margin:0 0 12px;  
+      ">  
+        ₦${product.price.toLocaleString()}  
+      </p>  
 
-  if (
-    value === "baggie jean" ||
-    value === "baggie jeans"
-  ) {
+      ${  
+        soldOut  
+          ? `  
+            <button  
+              disabled  
+              style="  
+                width:100%;  
+                padding:12px;  
+                background:#ddd;  
+                color:#777;  
+                border:none;  
+                border-radius:8px;  
+                cursor:not-allowed;  
+              "  
+            >  
+              Sold Out  
+            </button>  
+          `  
+          : `  
+            <button  
+              onclick="addToCart(${JSON.stringify(product.id)})"  
+              style="  
+                width:100%;  
+                padding:12px;  
+                background:#111;  
+                color:white;  
+                border:none;  
+                border-radius:8px;  
+                font-weight:bold;  
+                cursor:pointer;  
+              "  
+            >  
+              🛒 Add to Cart  
+            </button>  
+          `  
+      }  
 
-    return "Baggie Jeans";
+    </div>  
 
-  }
+  </div>  
+`;
 
-
-  if (
-    value === "hoodie" ||
-    value === "hoodies"
-  ) {
-
-    return "Hoodies";
-
-  }
-
-
-  return category;
-
+}).join("");
 }
 
+/* =========================================================
+FILTER
+========================================================= */
 
-// ============================================
-// CREATE CATEGORY BUTTONS
-// ============================================
+function setFilter(filter, btn) {
 
-function createCategoryButtons() {
+document.querySelectorAll(".filter-btn").forEach(function(button) {
+button.classList.remove("active");
+});
 
-  const productsSection =
-    document.getElementById(
-      "products"
-    );
-
-
-  if (!productsSection) {
-    return;
-  }
-
-
-  let categoryBox =
-    document.querySelector(
-      ".category-filters"
-    );
-
-
-  // If you already have category buttons
-  // in index.html, don't create another set.
-
-  if (categoryBox) {
-    return;
-  }
-
-
-  categoryBox =
-    document.createElement("div");
-
-
-  categoryBox.className =
-    "category-filters";
-
-
-  categoryBox.style.cssText = `
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    width:100%;
-    margin-top:15px;
-  `;
-
-
-  const categories = [
-    ["all", "All"],
-    ["T-Shirts", "T-Shirts"],
-    ["Baggie Jeans", "Baggie Jeans"],
-    ["Hoodies", "Hoodies"]
-  ];
-
-
-  categories.forEach(
-    ([value, label]) => {
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-
-      button.className =
-        "category-btn";
-
-
-      if (value === "all") {
-        button.classList.add(
-          "active"
-        );
-      }
-
-
-      button.textContent =
-        label;
-
-
-      button.onclick =
-        function() {
-
-          setCategory(
-            value,
-            this
-          );
-
-        };
-
-
-      categoryBox.appendChild(
-        button
-      );
-
-    }
-  );
-
-
-  const header =
-    productsSection.querySelector(
-      ".section-header"
-    );
-
-
-  if (header) {
-
-    header.appendChild(
-      categoryBox
-    );
-
-  } else {
-
-    productsSection.prepend(
-      categoryBox
-    );
-
-  }
-
+if (btn) {
+btn.classList.add("active");
 }
 
-
-// ============================================
-// CATEGORY FILTER
-// ============================================
-
-function setCategory(
-  category,
-  button
-) {
-
-  currentCategory =
-    category;
-
-
-  document
-    .querySelectorAll(
-      ".category-btn"
-    )
-    .forEach(btn => {
-
-      btn.classList.remove(
-        "active"
-      );
-
-    });
-
-
-  if (button) {
-
-    button.classList.add(
-      "active"
-    );
-
-  }
-
-
-  renderProducts();
-
+renderProducts(filter);
 }
 
-
-// ============================================
-// AVAILABILITY FILTER
-// ============================================
-
-function setFilter(
-  filter,
-  btn
-) {
-
-  currentFilter =
-    filter;
-
-
-  document
-    .querySelectorAll(
-      ".filter-btn"
-    )
-    .forEach(button => {
-
-      button.classList.remove(
-        "active"
-      );
-
-    });
-
-
-  if (btn) {
-
-    btn.classList.add(
-      "active"
-    );
-
-  }
-
-
-  renderProducts();
-
-}
-
-
-// ============================================
-// RENDER PRODUCTS
-// ============================================
-
-function renderProducts(
-  filter = currentFilter
-) {
-
-  currentFilter =
-    filter;
-
-
-  const grid =
-    document.getElementById(
-      "product-grid"
-    );
-
-
-  if (!grid) {
-    return;
-  }
-
-
-  let products =
-    [...shopProducts];
-
-
-  // CATEGORY
-
-  if (
-    currentCategory !== "all"
-  ) {
-
-    products =
-      products.filter(
-        product =>
-          normalizeCategory(
-            product.category
-          ) === currentCategory
-      );
-
-  }
-
-
-  // AVAILABILITY
-
-  if (
-    currentFilter ===
-    "available"
-  ) {
-
-    products =
-      products.filter(
-        product =>
-          product.available
-      );
-
-  }
-
-
-  if (
-    currentFilter ===
-    "sold"
-  ) {
-
-    products =
-      products.filter(
-        product =>
-          !product.available
-      );
-
-  }
-
-
-  if (!products.length) {
-
-    grid.innerHTML = `
-      <div style="
-        grid-column:1/-1;
-        text-align:center;
-        padding:45px 15px;
-        color:#777;
-      ">
-        <h3>No products found</h3>
-        <p>
-          There are no products in this category yet.
-        </p>
-      </div>
-    `;
-
-    return;
-  }
-
-
-  grid.innerHTML =
-    products.map(
-      product =>
-        createProductCard(
-          product
-        )
-    ).join("");
-
-}
-
-
-// ============================================
-// PRODUCT CARD
-// ============================================
-
-function createProductCard(
-  product
-) {
-
-  const soldOut =
-    !product.available;
-
-
-  return `
-
-    <div
-      class="product-card"
-      data-category="${escapeAttribute(
-        product.category
-      )}"
-    >
-
-      <div class="product-image-wrap">
-
-        <img
-          src="${escapeAttribute(
-            product.image_url ||
-            product.image ||
-            "logo.png"
-          )}"
-          alt="${escapeAttribute(
-            product.name
-          )}"
-          class="product-image"
-          onerror="this.src='logo.png'"
-        >
-
-        ${
-          soldOut
-            ? `
-              <div
-                class="sold-out-badge"
-              >
-                SOLD OUT
-              </div>
-            `
-            : ""
-        }
-
-      </div>
-
-
-      <div class="product-info">
-
-        <div
-          style="
-            font-size:13px;
-            font-weight:bold;
-            opacity:.65;
-            margin-bottom:6px;
-          "
-        >
-          ${escapeHtml(
-            normalizeCategory(
-              product.category
-            )
-          )}
-        </div>
-
-
-        <h3>
-          ${escapeHtml(
-            product.name
-          )}
-        </h3>
-
-
-        <p class="product-price">
-          ₦${Number(
-            product.price
-          ).toLocaleString()}
-        </p>
-
-
-        ${
-          soldOut
-            ? `
-              <button
-                class="add-to-cart-btn"
-                disabled
-                style="
-                  opacity:.5;
-                  cursor:not-allowed;
-                "
-              >
-                Sold Out
-              </button>
-            `
-            : `
-              <button
-                class="add-to-cart-btn"
-                onclick="addToCart('${escapeAttribute(
-                  product.id
-                )}')"
-              >
-                🛒 Add to Cart
-              </button>
-            `
-        }
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-// ============================================
-// ADD TO CART
-// ============================================
-
-function addToCart(
-  productId
-) {
-
-  const product =
-    shopProducts.find(
-      p =>
-        String(p.id) ===
-        String(productId)
-    );
-
-
-  if (!product) {
-    return;
-  }
-
-
-  if (!product.available) {
-
-    showToast(
-      "This product is sold out."
-    );
-
-    return;
-  }
-
-
-  const existing =
-    cart.find(
-      item =>
-        String(item.id) ===
-        String(product.id)
-    );
-
-
-  if (existing) {
-
-    existing.quantity += 1;
-
-  } else {
-
-    cart.push({
-
-      id: product.id,
-
-      name: product.name,
-
-      price: product.price,
-
-      image:
-        product.image_url ||
-        product.image,
-
-      quantity: 1
-
-    });
-
-  }
-
-
-  saveCart();
-
-  updateCartCount();
-
-  renderCart();
-
-  showToast(
-    "Added to cart 🛒"
-  );
-
-}
-
-
-// ============================================
-// SAVE CART
-// ============================================
+/* =========================================================
+CART
+========================================================= */
 
 function saveCart() {
+localStorage.setItem(
+"collins_cart",
+JSON.stringify(cart)
+);
+}
 
-  localStorage.setItem(
-    "collins_cart",
-    JSON.stringify(cart)
-  );
+function addToCart(productId) {
+
+const product = shopProducts.find(function(item) {
+return String(item.id) === String(productId);
+});
+
+if (!product) {
+showToast("Product not found.", "error");
+return;
+}
+
+if (!product.available) {
+showToast("Sorry, this product is sold out.", "warning");
+return;
+}
+
+const existing = cart.find(function(item) {
+return String(item.id) === String(product.id);
+});
+
+if (existing) {
+
+existing.quantity += 1;
+
+} else {
+
+cart.push({  
+  id: product.id,  
+  name: product.name,  
+  price: product.price,  
+
+  /*  
+    Save the REAL image URL in the cart too.  
+  */  
+  image: product.image_url || product.image || "logo.png",  
+
+  quantity: 1  
+});
 
 }
 
+saveCart();
+updateCartCount();
+renderCart();
 
-// ============================================
-// CART COUNT
-// ============================================
+showToast("Added to cart 🛒");
+}
+
+function removeFromCart(productId) {
+
+cart = cart.filter(function(item) {
+return String(item.id) !== String(productId);
+});
+
+saveCart();
+updateCartCount();
+renderCart();
+}
+
+function increaseQuantity(productId) {
+
+const item = cart.find(function(item) {
+return String(item.id) === String(productId);
+});
+
+if (item) {
+item.quantity += 1;
+}
+
+saveCart();
+updateCartCount();
+renderCart();
+}
+
+function decreaseQuantity(productId) {
+
+const item = cart.find(function(item) {
+return String(item.id) === String(productId);
+});
+
+if (!item) return;
+
+if (item.quantity > 1) {
+
+item.quantity -= 1;
+
+} else {
+
+removeFromCart(productId);  
+return;
+
+}
+
+saveCart();
+updateCartCount();
+renderCart();
+}
+
+/* =========================================================
+CART COUNT
+========================================================= */
 
 function updateCartCount() {
 
-  const count =
-    cart.reduce(
-      (total, item) =>
-        total +
-        Number(
-          item.quantity || 0
-        ),
-      0
-    );
+const countElement =
+document.querySelector(".cart-count");
 
+if (!countElement) return;
 
-  const cartCount =
-    document.getElementById(
-      "cart-count"
-    );
+const totalItems = cart.reduce(function(total, item) {
 
+return total + Number(item.quantity || 0);
 
-  if (cartCount) {
+}, 0);
 
-    cartCount.textContent =
-      count;
+countElement.textContent = totalItems;
 
-  }
-
+countElement.style.display =
+totalItems > 0
+? "inline-flex"
+: "none";
 }
 
+/* =========================================================
+OPEN / CLOSE CART
+========================================================= */
 
-// ============================================
-// RENDER CART
-// ============================================
+function openCart() {
+
+const overlay =
+document.getElementById("cart-overlay");
+
+if (!overlay) return;
+
+overlay.classList.add("open");
+
+renderCart();
+}
+
+function closeCart() {
+
+const overlay =
+document.getElementById("cart-overlay");
+
+if (!overlay) return;
+
+overlay.classList.remove("open");
+}
+
+/* =========================================================
+RENDER CART
+========================================================= */
 
 function renderCart() {
 
-  const cartItems =
-    document.getElementById(
-      "cart-items"
-    );
+const container =
+document.getElementById("cart-items");
 
+const footer =
+document.getElementById("cart-footer");
 
-  if (!cartItems) {
-    return;
-  }
+const totalElement =
+document.getElementById("cart-total-amount");
 
+if (!container) return;
 
-  if (!cart.length) {
+if (!cart.length) {
 
-    cartItems.innerHTML = `
-      <p style="
-        text-align:center;
-        padding:30px;
-        color:#777;
-      ">
-        Your cart is empty 🛒
-      </p>
-    `;
+container.innerHTML = `  
+  <div style="  
+    padding:30px 15px;  
+    text-align:center;  
+    color:#777;  
+  ">  
+    <div style="font-size:40px;">🛒</div>  
+    <p>Your cart is empty.</p>  
+  </div>  
+`;  
 
-    updateCartTotal();
+if (footer) {  
+  footer.style.display = "none";  
+}  
 
-    return;
-  }
-
-
-  cartItems.innerHTML =
-    cart.map(
-      item => `
-
-        <div
-          class="cart-item"
-          style="
-            display:flex;
-            gap:12px;
-            align-items:center;
-            margin-bottom:15px;
-          "
-        >
-
-          <img
-            src="${escapeAttribute(
-              item.image ||
-              "logo.png"
-            )}"
-            style="
-              width:70px;
-              height:80px;
-              object-fit:cover;
-              border-radius:10px;
-            "
-          >
-
-          <div style="flex:1">
-
-            <strong>
-              ${escapeHtml(
-                item.name
-              )}
-            </strong>
-
-            <div>
-              ₦${Number(
-                item.price
-              ).toLocaleString()}
-            </div>
-
-            <div
-              style="
-                display:flex;
-                align-items:center;
-                gap:8px;
-                margin-top:7px;
-              "
-            >
-
-              <button
-                onclick="changeQuantity(
-                  '${escapeAttribute(
-                    item.id
-                  )}',
-                  -1
-                )"
-              >
-                −
-              </button>
-
-              <span>
-                ${item.quantity}
-              </span>
-
-              <button
-                onclick="changeQuantity(
-                  '${escapeAttribute(
-                    item.id
-                  )}',
-                  1
-                )"
-              >
-                +
-              </button>
-
-              <button
-                onclick="removeFromCart(
-                  '${escapeAttribute(
-                    item.id
-                  )}'
-                )"
-                style="
-                  margin-left:8px;
-                  color:red;
-                "
-              >
-                Remove
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      `
-    ).join("");
-
-
-  updateCartTotal();
+return;
 
 }
 
+let total = 0;
 
-// ============================================
-// CHANGE QUANTITY
-// ============================================
+container.innerHTML = cart.map(function(item) {
 
-function changeQuantity(
-  id,
-  amount
-) {
+const itemTotal =  
+  Number(item.price) *  
+  Number(item.quantity);  
 
-  const item =
-    cart.find(
-      product =>
-        String(product.id) ===
-        String(id)
-    );
+total += itemTotal;  
 
+const itemImage =  
+  item.image || "logo.png";  
 
-  if (!item) {
-    return;
-  }
+return `  
+  <div style="  
+    display:flex;  
+    gap:10px;  
+    padding:12px 0;  
+    border-bottom:1px solid #eee;  
+  ">  
 
+    <img  
+      src="${escapeHTML(itemImage)}"  
+      alt="${escapeHTML(item.name)}"  
+      style="  
+        width:65px;  
+        height:65px;  
+        object-fit:cover;  
+        border-radius:8px;  
+      "  
+      onerror="this.onerror=null; this.src='logo.png';"  
+    >  
 
-  item.quantity += amount;
+    <div style="flex:1;">  
 
+      <strong>  
+        ${escapeHTML(item.name)}  
+      </strong>  
 
-  if (item.quantity <= 0) {
+      <div style="margin-top:5px;">  
+        ₦${Number(item.price).toLocaleString()}  
+      </div>  
 
-    cart =
-      cart.filter(
-        product =>
-          String(product.id) !==
-          String(id)
-      );
+      <div style="  
+        display:flex;  
+        align-items:center;  
+        gap:8px;  
+        margin-top:8px;  
+      ">  
 
-  }
+        <button  
+          onclick="decreaseQuantity(${JSON.stringify(item.id)})"  
+          style="  
+            width:30px;  
+            height:30px;  
+            border:1px solid #ddd;  
+            background:white;  
+            border-radius:6px;  
+          "  
+        >  
+          −  
+        </button>  
 
+        <strong>  
+          ${item.quantity}  
+        </strong>  
 
-  saveCart();
+        <button  
+          onclick="increaseQuantity(${JSON.stringify(item.id)})"  
+          style="  
+            width:30px;  
+            height:30px;  
+            border:1px solid #ddd;  
+            background:white;  
+            border-radius:6px;  
+          "  
+        >  
+          +  
+        </button>  
 
-  updateCartCount();
+        <button  
+          onclick="removeFromCart(${JSON.stringify(item.id)})"  
+          style="  
+            margin-left:auto;  
+            border:none;  
+            background:none;  
+            color:#dc2626;  
+            cursor:pointer;  
+          "  
+        >  
+          🗑️  
+        </button>  
 
-  renderCart();
+      </div>  
 
-}
+    </div>  
 
+  </div>  
+`;
 
-// ============================================
-// REMOVE FROM CART
-// ============================================
+}).join("");
 
-function removeFromCart(id) {
+if (totalElement) {
 
-  cart =
-    cart.filter(
-      item =>
-        String(item.id) !==
-        String(id)
-    );
-
-
-  saveCart();
-
-  updateCartCount();
-
-  renderCart();
-
-}
-
-
-// ============================================
-// CART TOTAL
-// ============================================
-
-function updateCartTotal() {
-
-  const total =
-    cart.reduce(
-      (sum, item) =>
-        sum +
-        Number(item.price) *
-        Number(item.quantity),
-      0
-    );
-
-
-  const totalElement =
-    document.getElementById(
-      "cart-total"
-    );
-
-
-  if (totalElement) {
-
-    totalElement.textContent =
-      "₦" +
-      total.toLocaleString();
-
-  }
-
-}
-
-
-// ============================================
-// TOAST
-// ============================================
-
-function showToast(
-  message
-) {
-
-  let toast =
-    document.getElementById(
-      "collins-toast"
-    );
-
-
-  if (!toast) {
-
-    toast =
-      document.createElement(
-        "div"
-      );
-
-    toast.id =
-      "collins-toast";
-
-
-    toast.style.cssText = `
-      position:fixed;
-      bottom:25px;
-      left:50%;
-      transform:translateX(-50%);
-      background:#111;
-      color:white;
-      padding:14px 22px;
-      border-radius:12px;
-      z-index:99999;
-      font-weight:bold;
-    `;
-
-
-    document.body.appendChild(
-      toast
-    );
-
-  }
-
-
-  toast.textContent =
-    message;
-
-
-  toast.style.display =
-    "block";
-
-
-  setTimeout(
-    () => {
-      toast.style.display =
-        "none";
-    },
-    2200
-  );
+totalElement.textContent =  
+  "₦" + total.toLocaleString();
 
 }
 
+if (footer) {
+footer.style.display = "block";
+}
+}
 
-// ============================================
-// SECURITY
-// ============================================
+/* =========================================================
+CHECKOUT
+========================================================= */
 
-function escapeHtml(
-  value
-) {
+function openCheckout() {
 
-  return String(value)
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+if (!cart.length) {
+
+showToast(  
+  "Your cart is empty.",  
+  "warning"  
+);  
+
+return;
 
 }
 
+const modal =
+document.getElementById("checkout-modal");
 
-function escapeAttribute(
-  value
-) {
+if (!modal) return;
 
-  return escapeHtml(
-    value
-  );
+updateCheckoutTotal();
 
+modal.classList.add("open");
 }
 
+function closeCheckout() {
 
-// ============================================
-// START SHOP
-// ============================================
+const modal =
+document.getElementById("checkout-modal");
 
-document.addEventListener(
-  "DOMContentLoaded",
-  async function() {
+if (!modal) return;
 
-    updateCartCount();
+modal.classList.remove("open");
+}
 
-    renderCart();
+function updateCheckoutTotal() {
 
-    await loadProductsFromSupabase();
+let total = cart.reduce(
+function(sum, item) {
 
-  }
+return sum +  
+    Number(item.price) *  
+    Number(item.quantity);  
+
+},  
+0
+
 );
 
+const delivery =
+document.querySelector(
+'input[name="delivery"]:checked'
+);
 
-// ============================================
-// MAKE FUNCTIONS AVAILABLE TO HTML
-// ============================================
+if (
+delivery &&
+delivery.value === "delivery"
+) {
+total += 2000;
+}
+
+const totalElement =
+document.getElementById("checkout-total");
+
+if (totalElement) {
+
+totalElement.textContent =  
+  "₦" + total.toLocaleString();
+
+}
+}
+
+/* =========================================================
+PLACE ORDER
+========================================================= */
+
+async function placeOrder(event) {
+
+event.preventDefault();
+
+if (!cart.length) {
+
+showToast(  
+  "Your cart is empty.",  
+  "warning"  
+);  
+
+return;
+
+}
+
+const name =
+document.getElementById("cust-name").value.trim();
+
+const phone =
+document.getElementById("cust-phone").value.trim();
+
+const address =
+document.getElementById("cust-address").value.trim();
+
+const note =
+document.getElementById("cust-note").value.trim();
+
+const delivery =
+document.querySelector(
+'input[name="delivery"]:checked'
+);
+
+if (!name || !phone) {
+
+showToast(  
+  "Please enter your name and phone number.",  
+  "warning"  
+);  
+
+return;
+
+}
+
+if (
+delivery &&
+delivery.value === "delivery" &&
+!address
+) {
+
+showToast(  
+  "Please enter your delivery address.",  
+  "warning"  
+);  
+
+return;
+
+}
+
+const subtotal =
+cart.reduce(
+function(sum, item) {
+
+return sum +  
+      Number(item.price) *  
+      Number(item.quantity);  
+
+  },  
+  0  
+);
+
+const deliveryFee =
+(
+delivery &&
+delivery.value === "delivery"
+)
+? 2000
+: 0;
+
+const total =
+subtotal + deliveryFee;
+
+const orderItems =
+cart.map(function(item) {
+
+return {  
+    product_id: item.id,  
+    name: item.name,  
+    price: item.price,  
+    quantity: item.quantity  
+  };  
+
+});
+
+/* =======================================================
+SAVE ORDER TO SUPABASE
+======================================================= */
+
+if (shopSupabase) {
+
+try {  
+
+  const { error } =  
+    await shopSupabase  
+      .from("orders")  
+      .insert({  
+
+        customer_name: name,  
+
+        customer_phone: phone,  
+
+        customer_address:  
+          (  
+            delivery &&  
+            delivery.value === "delivery"  
+          )  
+            ? address  
+            : "Pickup",  
+
+        note: note,  
+
+        delivery:  
+          delivery  
+            ? delivery.value  
+            : "pickup",  
+
+        items: orderItems,  
+
+        subtotal: subtotal,  
+
+        delivery_fee: deliveryFee,  
+
+        total: total,  
+
+        status: "pending"  
+
+      });  
+
+
+  if (error) {  
+
+    console.warn(  
+      "Supabase order error:",  
+      error  
+    );  
+
+  }  
+
+} catch (error) {  
+
+  console.warn(  
+    "Supabase order error:",  
+    error  
+  );  
+
+}
+
+}
+
+/* =======================================================
+WHATSAPP MESSAGE
+======================================================= */
+
+let message =
+"Hello Collins Clothing!%0A%0A" +
+"NEW ORDER%0A%0A";
+
+message +=
+"Name: " +
+encodeURIComponent(name) +
+"%0A";
+
+message +=
+"Phone: " +
+encodeURIComponent(phone) +
+"%0A";
+
+message +=
+"Option: " +
+encodeURIComponent(
+delivery
+? delivery.value
+: "pickup"
+) +
+"%0A";
+
+if (
+delivery &&
+delivery.value === "delivery"
+) {
+
+message +=  
+  "Address: " +  
+  encodeURIComponent(address) +  
+  "%0A";
+
+}
+
+message +=
+"%0AItems:%0A";
+
+cart.forEach(function(item) {
+
+const itemTotal =  
+  Number(item.price) *  
+  Number(item.quantity);  
+
+message +=  
+  encodeURIComponent(  
+    item.name +  
+    " x" +  
+    item.quantity +  
+    " = ₦" +  
+    itemTotal.toLocaleString()  
+  ) +  
+  "%0A";
+
+});
+
+message +=
+"%0ASubtotal: ₦" +
+subtotal.toLocaleString();
+
+if (deliveryFee > 0) {
+
+message +=  
+  "%0ADelivery: ₦2,000";
+
+}
+
+message +=
+"%0ATOTAL: ₦" +
+total.toLocaleString() +
+"";
+
+if (note) {
+
+message +=  
+  "%0ANote: " +  
+  encodeURIComponent(note);
+
+}
+
+message +=
+"%0A%0APayment: PiggyVest";
+
+/* =======================================================
+CLEAR CART
+======================================================= */
+
+cart = [];
+
+saveCart();
+
+updateCartCount();
+
+closeCheckout();
+
+closeCart();
+
+const checkoutForm =
+document.getElementById(
+"checkout-form"
+);
+
+if (checkoutForm) {
+checkoutForm.reset();
+}
+
+updateCheckoutTotal();
+
+/* =======================================================
+OPEN WHATSAPP
+======================================================= */
+
+window.open(
+"https://wa.me/2349047101249?text=" +
+message,
+"_blank"
+);
+
+/* =======================================================
+SUCCESS MESSAGE
+======================================================= */
+
+showToast(
+"Order placed successfully! ✅"
+);
+}
+
+/* =========================================================
+HELPERS
+========================================================= */
+
+function escapeHTML(value) {
+
+return String(value)
+
+.replace(/&/g, "&amp;")  
+
+.replace(/</g, "&lt;")  
+
+.replace(/>/g, "&gt;")  
+
+.replace(/"/g, "&quot;")  
+
+.replace(/'/g, "&#039;");
+
+}
+
+/* =========================================================
+START
+========================================================= */
+
+document.addEventListener(
+"DOMContentLoaded",
+function() {
+
+loadProductsFromSupabase();  
+
+updateCartCount();  
+
+renderCart();
+
+}
+);
+
+/* =========================================================
+MAKE FUNCTIONS AVAILABLE TO HTML BUTTONS
+========================================================= */
 
 window.setFilter =
-  setFilter;
-
-window.setCategory =
-  setCategory;
+setFilter;
 
 window.addToCart =
-  addToCart;
-
-window.changeQuantity =
-  changeQuantity;
+addToCart;
 
 window.removeFromCart =
-  removeFromCart;
+removeFromCart;
 
-window.renderCart =
-  renderCart;
+window.increaseQuantity =
+increaseQuantity;
+
+window.decreaseQuantity =
+decreaseQuantity;
+
+window.openCart =
+openCart;
+
+window.closeCart =
+closeCart;
+
+window.openCheckout =
+openCheckout;
+
+window.closeCheckout =
+closeCheckout;
+
+window.updateCheckoutTotal =
+updateCheckoutTotal;
+
+window.placeOrder =
+placeOrder;
+
+window.renderProducts =
+renderProducts;
+
+window.loadProductsFromSupabase =
+loadProductsFromSupabase;
