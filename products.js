@@ -102,14 +102,14 @@ async function loadProductsFromSupabase() {
     if (error) throw error;
 
     shopProducts = (data || []).map(function (product) {
-      return {
-        id: product.id,
-        name: product.name || "Unnamed Product",
-        price: Number(product.price) || 0,
-        image: product.image_url || product.image || "logo.png",
-        available: product.available !== false
-      };
-    });
+  return {
+    id: product.id,
+    name: product.name || "Unnamed Product",
+    price: Number(product.price) || 0,
+    image: product.image_url || product.image || "logo.png",
+    available: product.available !== false
+  };
+});
 
     renderProducts(currentFilter);
     updateCartCount();
