@@ -178,7 +178,7 @@ function renderProducts(filter = "all") {
       </div>
     `;
   }).join("");
-
+}
 
 /* =========================================================
    ZOOM / PRODUCT VIEWER (FIXED)
