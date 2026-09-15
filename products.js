@@ -178,13 +178,16 @@ function renderProducts(filter = "all") {
       </div>
     `;
   }).join("");
-}
+
 
 /* =========================================================
-   ZOOM / PRODUCT VIEWER
+   ZOOM / PRODUCT VIEWER (FIXED)
 ========================================================= */
 
-function openZoom(imageSrc, productName) {
+function openZoom(productId) {
+  const product = shopProducts.find(p => String(p.id) === String(productId));
+  if (!product) return;
+
   // Remove old zoom if exists
   const old = document.getElementById("product-zoom");
   if (old) old.remove();
@@ -210,25 +213,26 @@ function openZoom(imageSrc, productName) {
       right: 20px;
       background: white;
       border: none;
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
       cursor: pointer;
       z-index: 10;
     ">×</button>
 
-    <p style="color:white;margin-bottom:15px;font-size:16px;text-align:center;">${escapeHTML(productName)}</p>
+    <p style="color:white;margin-bottom:15px;font-size:16px;text-align:center;max-width:90%;">
+      ${escapeHTML(product.name)}
+    </p>
 
     <img 
-      src="${escapeHTML(imageSrc)}" 
+      src="${escapeHTML(product.image || 'logo.png')}" 
       style="
         max-width: 100%;
         max-height: 80vh;
         object-fit: contain;
         border-radius: 8px;
-        touch-action: pinch-zoom;
       "
       onerror="this.src='logo.png'"
     >
@@ -242,6 +246,13 @@ function openZoom(imageSrc, productName) {
   document.body.appendChild(zoom);
   document.body.style.overflow = "hidden";
 }
+
+function closeZoom() {
+  const zoom = document.getElementById("product-zoom");
+  if (zoom) zoom.remove();
+  document.body.style.overflow = "";
+}
+        
 
 function closeZoom() {
   const zoom = document.getElementById("product-zoom");
