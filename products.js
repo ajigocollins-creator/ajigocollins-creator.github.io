@@ -1,6 +1,6 @@
 /* =========================================================
    COLLINS CLOTHING - CUSTOMER SHOP
-   Supabase + Products + Cart + Checkout
+   Supabase + Products + Cart + Checkout + Zoom
 ========================================================= */
 
 let shopProducts = [];
@@ -81,7 +81,7 @@ function showToast(message, type = "success") {
 }
 
 /* =========================================================
-   LOAD PRODUCTS (FIXED - NO SYNTAX ERROR)
+   LOAD PRODUCTS
 ========================================================= */
 
 async function loadProductsFromSupabase() {
@@ -126,7 +126,7 @@ async function loadProductsFromSupabase() {
 }
 
 /* =========================================================
-   RENDER PRODUCTS
+   RENDER PRODUCTS + ZOOM
 ========================================================= */
 
 function renderProducts(filter = "all") {
@@ -153,7 +153,7 @@ function renderProducts(filter = "all") {
 
     return `
       <div class="product-card">
-        <div style="position:relative;">
+        <div style="position:relative; cursor:pointer;" onclick="openZoom('\( {escapeHTML(imageSource)}', ' \){escapeHTML(product.name)}')">
           <img
             src="${escapeHTML(imageSource)}"
             alt="${escapeHTML(product.name)}"
@@ -178,6 +178,75 @@ function renderProducts(filter = "all") {
       </div>
     `;
   }).join("");
+}
+
+/* =========================================================
+   ZOOM / PRODUCT VIEWER
+========================================================= */
+
+function openZoom(imageSrc, productName) {
+  // Remove old zoom if exists
+  const old = document.getElementById("product-zoom");
+  if (old) old.remove();
+
+  const zoom = document.createElement("div");
+  zoom.id = "product-zoom";
+  zoom.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  `;
+
+  zoom.innerHTML = `
+    <button onclick="closeZoom()" style="
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 10;
+    ">×</button>
+
+    <p style="color:white;margin-bottom:15px;font-size:16px;text-align:center;">${escapeHTML(productName)}</p>
+
+    <img 
+      src="${escapeHTML(imageSrc)}" 
+      style="
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+        border-radius: 8px;
+        touch-action: pinch-zoom;
+      "
+      onerror="this.src='logo.png'"
+    >
+  `;
+
+  // Close when clicking the dark background
+  zoom.addEventListener("click", function(e) {
+    if (e.target === zoom) closeZoom();
+  });
+
+  document.body.appendChild(zoom);
+  document.body.style.overflow = "hidden";
+}
+
+function closeZoom() {
+  const zoom = document.getElementById("product-zoom");
+  if (zoom) zoom.remove();
+  document.body.style.overflow = "";
 }
 
 /* =========================================================
@@ -466,3 +535,5 @@ window.updateCheckoutTotal = updateCheckoutTotal;
 window.placeOrder = placeOrder;
 window.renderProducts = renderProducts;
 window.loadProductsFromSupabase = loadProductsFromSupabase;
+window.openZoom = openZoom;
+window.closeZoom = closeZoom;
