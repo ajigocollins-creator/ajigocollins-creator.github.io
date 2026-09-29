@@ -329,36 +329,6 @@
         alert('Please write something');  
         return;  
       }  
-      <!-- SIDE MENU -->
-<div id="side-menu" style="
-  position:fixed; top:0; left:-280px; width:280px; height:100%;
-  background:#111; color:white; z-index:9999;
-  transition:left 0.3s ease; padding:20px;
-">
-  <button onclick="closeMenu()" style="background:none;border:none;color:white;font-size:28px;float:right;">×</button>
-  <h3 style="margin:40px 0 20px;">Menu</h3>
-  
-  <a href="https://wa.me/2349047101249?text=Hello%20Collins%20Clothing%2C%20I%20want%20to%20leave%20a%20comment%2Freview" 
-     style="display:block;color:white;padding:14px 0;border-bottom:1px solid #333;text-decoration:none;">
-    💬 Leave a Comment / Review
-  </a>
-  
-  <a href="https://wa.me/2349047101249?text=Hello%20Collins%20Clothing%2C%20I%20have%20a%20complaint" 
-     style="display:block;color:white;padding:14px 0;border-bottom:1px solid #333;text-decoration:none;">
-    ⚠️ Make a Complaint
-  </a>
-  
-  <a href="https://wa.me/2349047101249?text=Hello%20Collins%20Clothing%2C%20I%20want%20to%20contact%20you" 
-     style="display:block;color:white;padding:14px 0;border-bottom:1px solid #333;text-decoration:none;">
-    📞 Contact Us
-  </a>
-  
-  <a href="https://wa.me/2349047101249?text=Hello%20Collins%20Clothing%2C%20I%20want%20to%20rate%20your%20products" 
-     style="display:block;color:white;padding:14px 0;border-bottom:1px solid #333;text-decoration:none;">
-    ⭐ Rate Us
-  </a>
-</div>
-
 <div id="menu-overlay" onclick="closeSideMenu()" style="
   display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9998;
 "></div>
@@ -382,5 +352,59 @@
   <script src="supabase-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="products.js"></script>
+  <!-- ==================== SIDE MENU ==================== -->
+<div id="side-menu" style="
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
+  background: #111;
+  color: white;
+  z-index: 9999;
+  transition: left 0.3s ease;
+  padding: 20px;
+  box-sizing: border-box;
+">
+  <button onclick="closeSideMenu()" style="
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    float: right;
+    cursor: pointer;
+  ">×</button>
+
+  <h3 style="margin: 50px 0 25px; font-size: 20px;">Menu</h3>
+
+  <a href="https://wa.me/2349047101249?text=Hello%20Collins%20Clothing%2C%20I%20want%20to%20leave%20a%20comment%20or%20review"
+     style="display:block; color:white; padding:16px 0; border-bottom:1px solid #333; text-decoration:none; font-size:16px;">
+    💬 Leave a Comment / Review
+  </a>
+
+  <a href="https://wa.me/2349047101249?text=Hello%20Collins%20Clothing%2C%20I%20have%20a%20complaint"
+     style="display:block; color:white; padding:16px 0; border-bottom:1px solid #333; text-decoration:none; font-size:16px;">
+    ⚠️ Make a Complaint
+  </a>
+
+  <a href="https://wa.me/2349047101249?text=Hello%20Collins%20Clothing%2C%20I%20want%20to%20contact%20you"
+     style="display:block; color:white; padding:16px 0; border-bottom:1px solid #333; text-decoration:none; font-size:16px;">
+    📞 Contact Us
+  </a>
+
+  <a href="https://wa.me/2349047101249?text=Hello%20Collins%20Clothing%2C%20I%20want%20to%20rate%20your%20products%20and%20service"
+     style="display:block; color:white; padding:16px 0; border-bottom:1px solid #333; text-decoration:none; font-size:16px;">
+    ⭐ Rate Us
+  </a>
+</div>
+
+<!-- Dark overlay when menu is open -->
+<div id="menu-overlay" onclick="closeSideMenu()" style="
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9998;
+"></div>
 </body>
 </html>
