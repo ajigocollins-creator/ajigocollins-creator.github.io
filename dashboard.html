@@ -381,22 +381,11 @@
     placeholder="Price in ₦"  
     min="0"  
   >  
-    <label style="
-  display: block;
-  background: #f1f5f9;
-  border: 2px dashed #94a3b8;
-  border-radius: 10px;
-  padding: 18px;
-  text-align: center;
-  cursor: pointer;
-  margin-bottom: 12px;
-  color: #334155;
-  font-weight: 500;
-">
-  📷 Choose Photo from Gallery
-  <input type="file" id="img" accept="image/*" onchange="previewImage(event)" style="display: none;">
-</label>
-  id="img"  
+
+  <input 
+   type="photos"
+   id="img"  
+   accept="image/*"
 onchange="previewImage()"  
   >  
 
